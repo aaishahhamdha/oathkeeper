@@ -702,6 +702,55 @@
       "required": ["token_url"],
       "additionalProperties": false
     },
+    "configAuthenticatorsCallback": {
+      "type": "object",
+      "title": "Callback Authenticator Configuration",
+      "description": "This section is optional when the authenticator is disabled.",
+      "properties": {
+        "client_id": {
+          "type": "string",
+          "title": "OAuth 2.0 Client ID",
+          "description": "The OAuth 2.0 Client ID for the callback authentication.\n\n>If this authenticator is enabled, this value is required."
+        },
+        "client_secret": {
+          "type": "string",
+          "title": "OAuth 2.0 Client Secret",
+          "description": "The OAuth 2.0 Client Secret for the callback authentication.\n\n>If this authenticator is enabled, this value is required."
+        },
+        "token_url": {
+          "type": "string",
+          "format": "uri",
+          "title": "OAuth 2.0 Token URL",
+          "description": "The OAuth 2.0 Token Endpoint URL for exchanging the authorization code.\n\n>If this authenticator is enabled, this value is required."
+        },
+        "redirect_url": {
+          "type": "string",
+          "format": "uri",
+          "title": "Callback Redirect URL",
+          "description": "The URL where the authorization server will redirect after authorization.\n\n>If this authenticator is enabled, this value is required."
+        },
+        "token_endpoint_auth_method": {
+          "type": "string",
+          "title": "Token Endpoint Authentication Method",
+          "description": "The authentication method used at the token endpoint.",
+          "enum": ["client_secret_basic", "client_secret_post", "none"],
+          "default": "client_secret_basic"
+        },
+        "preserve_host": {
+          "title": "Preserve Host",
+          "type": "boolean",
+          "description": "When set to true the HTTP Header X-Forwarded-Host will be set to the original HTTP host.",
+          "default": false
+        }
+      },
+      "required": [
+        "client_id",
+        "client_secret",
+        "token_url",
+        "redirect_url"
+      ],
+      "additionalProperties": false
+    },
     "configAuthenticatorsOauth2Introspection": {
       "type": "object",
       "title": "OAuth 2.0 Introspection Authenticator Configuration",
@@ -1460,6 +1509,36 @@
             }
           ]
         },
+        "callback": {
+      "title": "Callback Authenticator",
+      "description": "The [`callback` authenticator] for handling OAuth 2.0 callback flows.",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "$ref": "#/definitions/handlerSwitch"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "enabled": {
+              "const": true
+            },
+            "config": {
+              "$ref": "#/definitions/configAuthenticatorsCallback"
+            }
+          },
+          "required": ["config"]
+        },
+        {
+          "properties": {
+            "enabled": {
+              "const": false
+            }
+          }
+        }
+      ]
+    },
         "oauth2_introspection": {
           "title": "OAuth 2.0 Token Introspection",
           "description": "The [`oauth2_introspection` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#oauth2_introspection).",

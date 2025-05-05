@@ -71,6 +71,9 @@ const (
 
 	// unauthorized
 	AuthenticatorUnauthorizedIsEnabled Key = "authenticators.unauthorized.enabled"
+
+	// callback
+	AuthenticatorCallbackIsEnabled Key = "authenticators.callback.enabled"
 )
 
 // Errors
