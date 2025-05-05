@@ -21,11 +21,11 @@ import (
 	_ "github.com/ory/jsonschema/v3/fileloader"
 	_ "github.com/ory/jsonschema/v3/httploader"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/pipeline/authz"
-	"github.com/ory/oathkeeper/pipeline/mutate"
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authz"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/mutate"
+	"github.com/aaishahhamdha/oathkeeper/x"
 	"github.com/ory/x/otelx"
 )
 

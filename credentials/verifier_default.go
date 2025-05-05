@@ -13,9 +13,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
 
+	"github.com/aaishahhamdha/oathkeeper/helper"
 	"github.com/ory/fosite"
 	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/x/jwtx"
 	"github.com/ory/x/stringslice"
 	"github.com/ory/x/stringsx"

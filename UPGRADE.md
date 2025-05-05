@@ -59,7 +59,7 @@ BREAKING CHANGES:
   (notice that the index changed by _-1_). A rule migrator exists which makes
   old rules compatible with the new format, if a version string is given. More
   details on the rule migration can be found here:
-  https://github.com/ory/oathkeeper/commit/fd16ceb230a1b14ebb01a147d2d70acce77f9fbd#diff-6177fb19f1b7d7bc392f5062b838df15
+  https://github.com/aaishahhamdha/oathkeeper/commit/fd16ceb230a1b14ebb01a147d2d70acce77f9fbd#diff-6177fb19f1b7d7bc392f5062b838df15
 
 ## v0.36
 
@@ -74,7 +74,7 @@ their respective package repositories:
 
 - [Python](https://pypi.org/project/ory-oathkeeper-client/)
 - [PHP](https://packagist.org/packages/ory/oathkeeper-client)
-- [Go](https://github.com/ory/oathkeeper-client-go)
+- [Go](https://github.com/aaishahhamdha/oathkeeper-client-go)
 - [NodeJS](https://www.npmjs.com/package/@oryd/oathkeeper-client) (with
   TypeScript)
 - [Java](https://search.maven.org/artifact/sh.ory.oathkeeper/oathkeeper-client)
@@ -267,7 +267,7 @@ file extensions are `yaml` and `yml`).
 ## v0.16.0-beta.1+oryOS.12
 
 ORY Oathkeeper was changed according to discussion
-[177](https://github.com/ory/oathkeeper/issues/177). Several issues have been
+[177](https://github.com/aaishahhamdha/oathkeeper/issues/177). Several issues have been
 resolved that could not be resolved before due to design decisions. We strongly
 encourage you to re-read the
 [documentation](https://www.ory.sh/oathkeeper/docs/) but to give you a short

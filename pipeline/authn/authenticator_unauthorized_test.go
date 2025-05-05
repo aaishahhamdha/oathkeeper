@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/internal"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
 )
 
 func mustParseURL(t *testing.T, u string) *url.URL {

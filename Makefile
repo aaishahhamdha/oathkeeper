@@ -60,7 +60,7 @@ sdk: .bin/swagger .bin/ory node_modules
 	mkdir -p internal/httpclient
 
 	swagger generate spec -m -o spec/swagger.json \
-		-c github.com/ory/oathkeeper \
+		-c github.com/aaishahhamdha/oathkeeper \
 		-c github.com/ory/x/healthx
 	ory dev swagger sanitize ./spec/swagger.json
 	swagger validate ./spec/swagger.json
@@ -80,7 +80,7 @@ install-stable:
 	OATHKEEPER_LATEST=$$(git describe --abbrev=0 --tags)
 	git checkout $$OATHKEEPER_LATEST
 	GO111MODULE=on go install \
-		-ldflags "-X github.com/ory/oathkeeper/x.Version=$$OATHKEEPER_LATEST -X github.com/ory/oathkeeper/x.Date=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/x.Commit=`git rev-parse HEAD`" \
+		-ldflags "-X github.com/aaishahhamdha/oathkeeper/x.Version=$$OATHKEEPER_LATEST -X github.com/aaishahhamdha/oathkeeper/x.Date=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/aaishahhamdha/oathkeeper/x.Commit=`git rev-parse HEAD`" \
 		.
 	git checkout master
 

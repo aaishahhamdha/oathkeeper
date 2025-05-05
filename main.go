@@ -4,7 +4,7 @@
 package main
 
 import (
-	"github.com/ory/oathkeeper/cmd"
+	"github.com/aaishahhamdha/oathkeeper/cmd"
 	"github.com/ory/x/profilex"
 )
 

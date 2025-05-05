@@ -11,9 +11,9 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/helper"
+	"github.com/aaishahhamdha/oathkeeper/x"
 
 	"github.com/ory/x/pagination"
 )

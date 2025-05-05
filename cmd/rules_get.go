@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ory/oathkeeper/internal/httpclient/client/api"
+	"github.com/aaishahhamdha/oathkeeper/internal/httpclient/client/api"
 	"github.com/ory/x/cmdx"
 )
 

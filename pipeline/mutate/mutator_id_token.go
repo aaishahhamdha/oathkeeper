@@ -20,11 +20,11 @@ import (
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 
-	"github.com/ory/oathkeeper/credentials"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/credentials"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/pipeline"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
+	"github.com/aaishahhamdha/oathkeeper/x"
 	"github.com/ory/x/urlx"
 )
 

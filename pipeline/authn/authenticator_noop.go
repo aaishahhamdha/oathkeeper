@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/pipeline"
 )
 
 type AuthenticatorNoOp struct {

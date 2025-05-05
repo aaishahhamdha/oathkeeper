@@ -14,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/x"
 )
 
 type defaultSignerMockRegistry struct {

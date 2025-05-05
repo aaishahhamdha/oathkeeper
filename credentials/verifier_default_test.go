@@ -15,8 +15,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/aaishahhamdha/oathkeeper/x"
 	"github.com/ory/fosite"
-	"github.com/ory/oathkeeper/x"
 )
 
 func TestVerifierDefault(t *testing.T) {

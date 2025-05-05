@@ -19,10 +19,10 @@ import (
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	. "github.com/ory/oathkeeper/pipeline/authz"
-	"github.com/ory/oathkeeper/rule"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
+	. "github.com/aaishahhamdha/oathkeeper/pipeline/authz"
+	"github.com/aaishahhamdha/oathkeeper/rule"
 	"github.com/ory/x/otelx"
 )
 

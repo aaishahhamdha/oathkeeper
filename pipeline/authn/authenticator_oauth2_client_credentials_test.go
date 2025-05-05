@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
-	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/internal"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
 	"github.com/ory/x/configx"
 
 	"github.com/julienschmidt/httprouter"
@@ -22,8 +22,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
 
+	"github.com/aaishahhamdha/oathkeeper/helper"
 	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/helper"
 )
 
 func authOkDynamic(u string) *http.Request {

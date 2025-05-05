@@ -12,7 +12,7 @@ import (
 
 	"github.com/ory/x/logrusx"
 
-	"github.com/ory/oathkeeper/driver"
+	"github.com/aaishahhamdha/oathkeeper/driver"
 )
 
 var (

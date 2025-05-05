@@ -10,10 +10,10 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/pipeline"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
+	"github.com/aaishahhamdha/oathkeeper/x"
 
 	"github.com/pkg/errors"
 )

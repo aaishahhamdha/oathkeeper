@@ -18,9 +18,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/oathkeeper/internal"
-	. "github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/x/header"
+	"github.com/aaishahhamdha/oathkeeper/internal"
+	. "github.com/aaishahhamdha/oathkeeper/pipeline/authn"
+	"github.com/aaishahhamdha/oathkeeper/x/header"
 )
 
 func TestAuthenticatorCookieSession(t *testing.T) {

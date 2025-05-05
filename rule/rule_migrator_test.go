@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/x"
 )
 
 func TestRuleMigration(t *testing.T) {

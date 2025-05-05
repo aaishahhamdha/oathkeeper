@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
 
-	"github.com/ory/oathkeeper/internal/httpclient/models"
+	"github.com/aaishahhamdha/oathkeeper/internal/httpclient/models"
 )
 
 // ListRulesReader is a Reader for the ListRules structure.

@@ -2,7 +2,7 @@ go 1.22
 
 toolchain go1.22.5
 
-module github.com/ory/oathkeeper
+module github.com/aaishahhamdha/oathkeeper
 
 replace github.com/mattn/go-sqlite3 => github.com/mattn/go-sqlite3 v1.14.10
 

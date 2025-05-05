@@ -18,17 +18,17 @@ import (
 
 	"github.com/tidwall/sjson"
 
-	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/rule"
+	"github.com/aaishahhamdha/oathkeeper/x"
 	"github.com/ory/x/configx"
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/ory/oathkeeper/credentials"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	. "github.com/ory/oathkeeper/pipeline/mutate"
+	"github.com/aaishahhamdha/oathkeeper/credentials"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/internal"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
+	. "github.com/aaishahhamdha/oathkeeper/pipeline/mutate"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -280,7 +280,7 @@ func TestMutatorIDToken(t *testing.T) {
 			})
 
 			t.Run("subcase=same tokens because session extra changed but claims ignore the extra claims", func(t *testing.T) {
-				t.Skip("Skipped because cache hit rate is too low, see: https://github.com/ory/oathkeeper/issues/371")
+				t.Skip("Skipped because cache hit rate is too low, see: https://github.com/aaishahhamdha/oathkeeper/issues/371")
 
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Second)

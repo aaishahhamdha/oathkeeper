@@ -263,7 +263,7 @@
 "github.com/ory/herodot","Apache-2.0"
 "github.com/ory/jsonschema/v3","BSD-3-Clause"
 "github.com/ory/ladon/compiler","Apache-2.0"
-"github.com/ory/oathkeeper","Apache-2.0"
+"github.com/aaishahhamdha/oathkeeper","Apache-2.0"
 "github.com/ory/x","Apache-2.0"
 "github.com/ory/x/reqlog","MIT"
 "github.com/pborman/uuid","BSD-3-Clause"

@@ -10,17 +10,17 @@ import (
 
 	"github.com/ory/x/healthx"
 
-	"github.com/ory/oathkeeper/pipeline/errors"
-	"github.com/ory/oathkeeper/proxy"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/errors"
+	"github.com/aaishahhamdha/oathkeeper/proxy"
 
-	"github.com/ory/oathkeeper/api"
-	"github.com/ory/oathkeeper/credentials"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/pipeline/authz"
-	"github.com/ory/oathkeeper/pipeline/mutate"
-	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/api"
+	"github.com/aaishahhamdha/oathkeeper/credentials"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authz"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/mutate"
+	"github.com/aaishahhamdha/oathkeeper/rule"
+	"github.com/aaishahhamdha/oathkeeper/x"
 )
 
 type Registry interface {

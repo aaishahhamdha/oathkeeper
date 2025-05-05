@@ -1,7 +1,7 @@
 # Workaround for https://github.com/GoogleContainerTools/distroless/issues/1342
 FROM golang:1.22-bullseye AS builder
 
-WORKDIR /go/src/github.com/ory/oathkeeper
+WORKDIR /go/src/github.com/aaishahhamdha/oathkeeper
 
 RUN apt-get update && apt-get upgrade -y
 

@@ -10,9 +10,9 @@ import (
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 
-	apiops "github.com/ory/oathkeeper/internal/httpclient/client/api"
-	"github.com/ory/oathkeeper/internal/httpclient/client/health"
-	"github.com/ory/oathkeeper/internal/httpclient/client/version"
+	apiops "github.com/aaishahhamdha/oathkeeper/internal/httpclient/client/api"
+	"github.com/aaishahhamdha/oathkeeper/internal/httpclient/client/health"
+	"github.com/aaishahhamdha/oathkeeper/internal/httpclient/client/version"
 )
 
 // Default ory oathkeeper HTTP client.

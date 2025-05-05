@@ -19,14 +19,14 @@ import (
 
 	"github.com/ory/x/httpx"
 
-	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
 
-	"github.com/ory/oathkeeper/pipeline"
+	"github.com/aaishahhamdha/oathkeeper/pipeline"
 
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/clientcredentials"
 
-	"github.com/ory/oathkeeper/helper"
+	"github.com/aaishahhamdha/oathkeeper/helper"
 )
 
 type AuthenticatorOAuth2Configuration struct {

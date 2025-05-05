@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 
-	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
 )
 
 type Match struct {

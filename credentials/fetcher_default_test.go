@@ -19,12 +19,12 @@ import (
 
 	"github.com/ory/x/logrusx"
 
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/x"
 
 	"github.com/ory/herodot"
 	"github.com/ory/x/urlx"
 
-	"github.com/ory/oathkeeper/internal/cloudstorage"
+	"github.com/aaishahhamdha/oathkeeper/internal/cloudstorage"
 )
 
 var sets = [...]json.RawMessage{

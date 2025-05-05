@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ory/oathkeeper/internal/httpclient/client/health"
+	"github.com/aaishahhamdha/oathkeeper/internal/httpclient/client/health"
 
 	"github.com/spf13/cobra"
 

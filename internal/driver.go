@@ -6,8 +6,8 @@ package internal
 import (
 	"context"
 
-	"github.com/ory/oathkeeper/driver"
-	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/driver"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
 )

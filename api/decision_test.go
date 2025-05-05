@@ -24,12 +24,12 @@ import (
 	"github.com/ory/herodot"
 	"github.com/ory/x/logrusx"
 
-	"github.com/ory/oathkeeper/api"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/proxy"
-	"github.com/ory/oathkeeper/rule"
+	"github.com/aaishahhamdha/oathkeeper/api"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/internal"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
+	"github.com/aaishahhamdha/oathkeeper/proxy"
+	"github.com/aaishahhamdha/oathkeeper/rule"
 )
 
 func TestDecisionAPI(t *testing.T) {

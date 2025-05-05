@@ -12,7 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/ory/oathkeeper/helper"
+	"github.com/aaishahhamdha/oathkeeper/helper"
 )
 
 const (

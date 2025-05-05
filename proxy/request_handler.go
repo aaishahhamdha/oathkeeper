@@ -10,18 +10,18 @@ import (
 	"github.com/ory/herodot"
 	"github.com/ory/x/errorsx"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/x"
 
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/pipeline/authz"
-	pe "github.com/ory/oathkeeper/pipeline/errors"
-	"github.com/ory/oathkeeper/pipeline/mutate"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authz"
+	pe "github.com/aaishahhamdha/oathkeeper/pipeline/errors"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/mutate"
 
 	"github.com/pkg/errors"
 
-	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/rule"
+	"github.com/aaishahhamdha/oathkeeper/helper"
+	"github.com/aaishahhamdha/oathkeeper/rule"
 )
 
 type requestHandlerRegistry interface {
@@ -138,7 +138,7 @@ func (d *requestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl 
 
 	if h == nil {
 		d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(
-			"Unable to handle HTTP request because no matching error handling strategy was found. This is a bug and should be reported to: http://github.com/ory/oathkeeper",
+			"Unable to handle HTTP request because no matching error handling strategy was found. This is a bug and should be reported to: http://github.com/aaishahhamdha/oathkeeper",
 		)))
 		return
 	}

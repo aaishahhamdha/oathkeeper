@@ -13,11 +13,11 @@ import (
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel/trace"
 
+	"github.com/aaishahhamdha/oathkeeper/credentials"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/helper"
+	"github.com/aaishahhamdha/oathkeeper/pipeline"
 	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/credentials"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/x/jwtx"
 	"github.com/ory/x/otelx"
 )

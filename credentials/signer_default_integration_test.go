@@ -11,7 +11,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/ory/oathkeeper/internal"
+	"github.com/aaishahhamdha/oathkeeper/internal"
 )
 
 func BenchmarkDefaultSigner(b *testing.B) {

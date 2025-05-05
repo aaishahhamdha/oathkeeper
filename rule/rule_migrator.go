@@ -16,7 +16,7 @@ import (
 	"github.com/ory/herodot"
 	"github.com/ory/x/stringsx"
 
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/x"
 )
 
 func migrateRuleJSON(raw []byte) ([]byte, error) {

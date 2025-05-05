@@ -15,7 +15,7 @@ import (
 
 	"github.com/ory/herodot"
 
-	"github.com/ory/oathkeeper/internal"
+	"github.com/aaishahhamdha/oathkeeper/internal"
 )
 
 func TestErrorWWWAuthenticate(t *testing.T) {

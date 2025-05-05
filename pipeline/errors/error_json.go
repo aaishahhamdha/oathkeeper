@@ -10,9 +10,9 @@ import (
 	"github.com/ory/herodot"
 	"github.com/ory/x/errorsx"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline"
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/pipeline"
+	"github.com/aaishahhamdha/oathkeeper/x"
 )
 
 var _ Handler = new(ErrorJSON)

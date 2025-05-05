@@ -27,10 +27,10 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
 
-	"github.com/ory/oathkeeper/driver"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/middleware"
-	"github.com/ory/oathkeeper/rule"
+	"github.com/aaishahhamdha/oathkeeper/driver"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/middleware"
+	"github.com/aaishahhamdha/oathkeeper/rule"
 )
 
 func testClient(t *testing.T, l *bufconn.Listener, dialOpts ...grpc.DialOption) grpc_testing.TestServiceClient {

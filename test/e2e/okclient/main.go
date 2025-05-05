@@ -15,7 +15,7 @@ import (
 	"github.com/go-jose/go-jose/v3"
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/x"
 	"github.com/ory/x/cmdx"
 	"github.com/ory/x/urlx"
 )

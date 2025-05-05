@@ -11,8 +11,8 @@ import (
 
 	"github.com/ory/herodot"
 
-	"github.com/ory/oathkeeper/pipeline"
-	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/aaishahhamdha/oathkeeper/pipeline"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
 )
 
 var ErrAuthorizerNotEnabled = herodot.DefaultError{

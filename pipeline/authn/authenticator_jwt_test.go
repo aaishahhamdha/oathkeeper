@@ -15,10 +15,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/tidwall/sjson"
 
+	"github.com/aaishahhamdha/oathkeeper/internal"
+	. "github.com/aaishahhamdha/oathkeeper/pipeline/authn"
+	"github.com/aaishahhamdha/oathkeeper/x"
 	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/internal"
-	. "github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/x"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"

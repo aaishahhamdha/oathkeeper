@@ -16,10 +16,10 @@ import (
 	"github.com/hashicorp/go-retryablehttp"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/pipeline"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
+	"github.com/aaishahhamdha/oathkeeper/x"
 
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/otelx"
@@ -28,7 +28,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tomasen/realip"
 
-	"github.com/ory/oathkeeper/helper"
+	"github.com/aaishahhamdha/oathkeeper/helper"
 )
 
 type AuthorizerKetoEngineACPORYConfiguration struct {

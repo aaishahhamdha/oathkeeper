@@ -11,15 +11,15 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/x"
 
 	"github.com/ory/x/pointerx"
 
-	"github.com/ory/oathkeeper/internal"
-	"github.com/ory/oathkeeper/internal/httpclient/client"
-	sdkrule "github.com/ory/oathkeeper/internal/httpclient/client/api"
-	"github.com/ory/oathkeeper/rule"
+	"github.com/aaishahhamdha/oathkeeper/internal"
+	"github.com/aaishahhamdha/oathkeeper/internal/httpclient/client"
+	sdkrule "github.com/aaishahhamdha/oathkeeper/internal/httpclient/client/api"
+	"github.com/aaishahhamdha/oathkeeper/rule"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

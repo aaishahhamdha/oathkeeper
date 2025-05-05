@@ -15,13 +15,13 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/pipeline/mutate"
-	"github.com/ory/oathkeeper/rule"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/mutate"
+	"github.com/aaishahhamdha/oathkeeper/rule"
 	"github.com/ory/x/configx"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/internal"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

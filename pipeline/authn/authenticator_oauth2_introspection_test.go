@@ -23,9 +23,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
-	. "github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/internal"
+	. "github.com/aaishahhamdha/oathkeeper/pipeline/authn"
 )
 
 func TestAuthenticatorOAuth2Introspection(t *testing.T) {
@@ -883,7 +883,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		require.NotEqual(t, preauthTwoClient2, preauthOneClient)
 
 		t.Run("Should not be equal because we changed a system default", func(t *testing.T) {
-			// Unskip once https://github.com/ory/oathkeeper/issues/757 lands
+			// Unskip once https://github.com/aaishahhamdha/oathkeeper/issues/757 lands
 			t.Skip("This fails due to viper caching and it makes no sense to fix it as we need to adopt koanf first")
 			conf.SetForTest(t, "authenticators.oauth2_introspection.config.pre_authorization", map[string]interface{}{"scope": []string{"foo"}})
 

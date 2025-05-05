@@ -22,7 +22,7 @@ import (
 
 	"github.com/ory/x/sqlcon/dockertest"
 
-	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
 )
 
 func TestMain(m *testing.M) {

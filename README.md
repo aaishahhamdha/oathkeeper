@@ -2,11 +2,11 @@
 
 <h4 align="center">
     <a href="https://www.ory.sh/chat">Chat</a> |
-    <a href="https://github.com/ory/oathkeeper/discussions">Discussions</a> |
+    <a href="https://github.com/aaishahhamdha/oathkeeper/discussions">Discussions</a> |
     <a href="https://www.ory.sh/l/sign-up-newsletter">Newsletter</a><br/><br/>
     <a href="https://www.ory.sh/oathkeeper/docs/reference/api">API Docs</a> |
     <a href="https://www.ory.sh/oathkeeper/docs/">Guide</a> |
-    <a href="https://godoc.org/github.com/ory/oathkeeper">Code Docs</a><br/><br/>
+    <a href="https://godoc.org/github.com/aaishahhamdha/oathkeeper">Code Docs</a><br/><br/>
     <a href="https://console.ory.sh/">Support this project!</a><br/><br/>
     <a href="https://www.ory.sh/jobs/">Work in Open Source, Ory is hiring!</a>
 </h4>
@@ -14,12 +14,12 @@
 ---
 
 <p align="left">
-    <a href="https://github.com/ory/oathkeeper/actions/workflows/ci.yml"><img src="https://github.com/ory/oathkeeper/actions/workflows/ci.yml/badge.svg" alt="Build Status"></a>
+    <a href="https://github.com/aaishahhamdha/oathkeeper/actions/workflows/ci.yml"><img src="https://github.com/aaishahhamdha/oathkeeper/actions/workflows/ci.yml/badge.svg" alt="Build Status"></a>
     <a href="https://coveralls.io/github/ory/oathkeeper?branch=master"> <img src="https://coveralls.io/repos/ory/oathkeeper/badge.svg?branch=master&service=github" alt="Coverage Status"></a>
-    <a href="https://goreportcard.com/report/github.com/ory/oathkeeper"><img src="https://goreportcard.com/badge/github.com/ory/oathkeeper" alt="Go Report Card"></a>
-    <a href="https://pkg.go.dev/github.com/ory/oathkeeper"><img src="https://pkg.go.dev/badge/www.github.com/ory/oathkeeper" alt="PkgGoDev"></a>
+    <a href="https://goreportcard.com/report/github.com/aaishahhamdha/oathkeeper"><img src="https://goreportcard.com/badge/github.com/aaishahhamdha/oathkeeper" alt="Go Report Card"></a>
+    <a href="https://pkg.go.dev/github.com/aaishahhamdha/oathkeeper"><img src="https://pkg.go.dev/badge/www.github.com/aaishahhamdha/oathkeeper" alt="PkgGoDev"></a>
     <a href="#backers" alt="sponsors on Open Collective"><img src="https://opencollective.com/ory/backers/badge.svg" /></a> <a href="#sponsors" alt="Sponsors on Open Collective"><img src="https://opencollective.com/ory/sponsors/badge.svg" /></a>
-    <a href="https://github.com/ory/oathkeeper/blob/master/CODE_OF_CONDUCT.md" alt="Ory Code of Conduct"><img src="https://img.shields.io/badge/ory-code%20of%20conduct-green" /></a>
+    <a href="https://github.com/aaishahhamdha/oathkeeper/blob/master/CODE_OF_CONDUCT.md" alt="Ory Code of Conduct"><img src="https://img.shields.io/badge/ory-code%20of%20conduct-green" /></a>
 </p>
 
 ORY Oathkeeper is an Identity & Access Proxy (IAP) and Access Control Decision
@@ -486,7 +486,7 @@ interface and user experience flows.
 
 ### Ory Oathkeeper: Identity & Access Proxy
 
-[Ory Oathkeeper](https://github.com/ory/oathkeeper) is a BeyondCorp/Zero Trust
+[Ory Oathkeeper](https://github.com/aaishahhamdha/oathkeeper) is a BeyondCorp/Zero Trust
 Identity & Access Proxy (IAP) with configurable authentication, authorization,
 and request mutation rules for your web services: Authenticate JWT, Access
 Tokens, API Keys, mTLS; Check if the contained subject is allowed to perform the
@@ -543,8 +543,8 @@ Developing with ORY Oathkeeper is as easy as:
 
 ```shell
 $ cd ~
-$ go get -d -u github.com/ory/oathkeeper
-$ cd $GOPATH/src/github.com/ory/oathkeeper
+$ go get -d -u github.com/aaishahhamdha/oathkeeper
+$ cd $GOPATH/src/github.com/aaishahhamdha/oathkeeper
 $ export GO111MODULE=on
 $ go test ./...
 ```

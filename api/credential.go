@@ -10,11 +10,11 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/ory/oathkeeper/credentials"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline/mutate"
-	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/credentials"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/mutate"
+	"github.com/aaishahhamdha/oathkeeper/rule"
+	"github.com/aaishahhamdha/oathkeeper/x"
 	"github.com/ory/x/urlx"
 
 	"github.com/go-jose/go-jose/v3"

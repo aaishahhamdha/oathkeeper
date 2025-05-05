@@ -7,12 +7,12 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/pipeline"
 
 	"github.com/pkg/errors"
 
-	"github.com/ory/oathkeeper/helper"
+	"github.com/aaishahhamdha/oathkeeper/helper"
 )
 
 type AuthenticatorUnauthorized struct {

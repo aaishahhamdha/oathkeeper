@@ -15,7 +15,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
-	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
 )

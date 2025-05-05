@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ory/oathkeeper/driver"
-	"github.com/ory/oathkeeper/x"
+	"github.com/aaishahhamdha/oathkeeper/driver"
+	"github.com/aaishahhamdha/oathkeeper/x"
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
 
