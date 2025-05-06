@@ -26,9 +26,9 @@ import (
 type AuthenticatorCallbackConfiguration struct {
 	ClientID                string                                   `json:"client_id"`
 	ClientSecret            string                                   `json:"client_secret"`
-	TokenEndpoint           string                                   `json:"token_endpoint"`
+	TokenEndpoint           string                                   `json:"token_url"`
 	RedirectURL             string                                   `json:"redirect_url"`
-	TokenEndpointAuthMethod string                                   `json:"token_endpoint_auth_method"`
+	TokenEndpointAuthMethod string                                   `json:"token_url_auth_method"`
 	Retry                   *AuthenticatorCallbackRetryConfiguration `json:"retry"`
 	Cache                   cacheConfig
 }

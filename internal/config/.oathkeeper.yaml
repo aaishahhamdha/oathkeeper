@@ -207,7 +207,7 @@ authenticators:
       redirect_url: http://localhost:4556/callback
       
       # REQUIRED IF ENABLED - The authentication method for the token endpoint (supports "client_secret_basic" or "client_secret_post")
-      token_endpoint_auth_method: client_secret_basic
+      token_url_auth_method: client_secret_basic
       
       # Optional configuration for retry behavior
       retry:
