@@ -253,12 +253,11 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 		IDToken      string `json:"id_token"`
 	}
 
-	fmt.Printf("Access token: %s", tokenResponse.AccessToken)
-	fmt.Printf("ID token: %s", tokenResponse.IDToken)
-
 	if err := json.NewDecoder(resp.Body).Decode(&tokenResponse); err != nil {
 		return errors.Wrap(err, "failed to decode token response")
 	}
+	fmt.Printf("Access token: %s", tokenResponse.AccessToken)
+	fmt.Printf("ID token: %s", tokenResponse.IDToken)
 
 	if session.Extra == nil {
 		session.Extra = make(map[string]interface{})
