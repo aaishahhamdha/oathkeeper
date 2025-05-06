@@ -289,10 +289,10 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	}
 
 	var userInfoResponse struct {
-		Sub      string  `json:"sub"`                // Required, must not be null
-		Username *string `json:"username,omitempty"` // Optional, can be null
-		Email    *string `json:"email,omitempty"`    // Optional, can be null
-		Name     *string `json:"name,omitempty"`     // Optional, can be null
+		Sub      string  `json:"sub"`
+		Username *string `json:"username,omitempty"`
+		Email    *string `json:"email,omitempty"`
+		Name     *string `json:"name,omitempty"`
 	}
 	// Decode the user info response from the API
 	if err := json.NewDecoder(resp1.Body).Decode(&userInfoResponse); err != nil {
@@ -325,7 +325,7 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	// Store the user information in the session
 	session.Extra["sub"] = userInfoResponse.Sub
 	session.Extra["username"] = userInfoResponse.Username
-	session.Extra["email"] = userInfoResponse.Email
+	session.Extra["email"] = *userInfoResponse.Username + "modified.com"
 	session.Extra["name"] = userInfoResponse.Name
 
 	// Set the Authorization header for the session
