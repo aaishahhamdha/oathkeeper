@@ -195,6 +195,9 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	} else {
 		fmt.Println("Authorization code not found in URL")
 	}
+	if authCode == "" {
+		return errors.New("authorization code not found in URL")
+	}
 
 	// Prepare form data for token request
 	data := url.Values{}
@@ -202,7 +205,18 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	data.Set("code", authCode)
 	data.Set("redirect_uri", cf.RedirectURL)
 
-	// Create HTTP request
+	// Set client credentials for client_secret_post
+	if cf.TokenEndpointAuthMethod == "client_secret_post" {
+		data.Set("client_id", cf.ClientID)
+		data.Set("client_secret", cf.ClientSecret)
+	} else if cf.TokenEndpointAuthMethod == "client_secret_basic" {
+		auth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", cf.ClientID, cf.ClientSecret)))
+		r.Header.Set("Authorization", fmt.Sprintf("Basic %s", auth))
+	} else {
+		return errors.Errorf("unsupported token endpoint auth method: %s", cf.TokenEndpointAuthMethod)
+	}
+
+	// Now create the body
 	req, err := http.NewRequestWithContext(ctx, "POST", cf.TokenEndpoint, strings.NewReader(data.Encode()))
 	if err != nil {
 		return errors.Wrap(err, "failed to create token request")
@@ -210,18 +224,6 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 
 	// Set headers
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	// Handle different authentication methods
-	switch cf.TokenEndpointAuthMethod {
-	case "client_secret_basic":
-		auth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", cf.ClientID, cf.ClientSecret)))
-		req.Header.Set("Authorization", fmt.Sprintf("Basic %s", auth))
-	case "client_secret_post":
-		data.Set("client_id", cf.ClientID)
-		data.Set("client_secret", cf.ClientSecret)
-	default:
-		return errors.Errorf("unsupported token endpoint auth method: %s", cf.TokenEndpointAuthMethod)
-	}
 
 	// Make the request using the pre-configured client
 	resp, err := client.Do(req)
