@@ -276,7 +276,7 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 		session.SetHeader("Authorization", fmt.Sprintf("Bearer %s", tokenResponse.AccessToken))
 	}
 
-	req1, err := http.NewRequestWithContext(ctx, "POST", cf.UserInforEndpoint, strings.NewReader(data.Encode()))
+	req1, err := http.NewRequestWithContext(ctx, "GET", cf.UserInforEndpoint, strings.NewReader(data.Encode()))
 	r.Header.Set("Authorization:", fmt.Sprintf("Bearer %s", tokenResponse.AccessToken))
 	resp1, err := client.Do(req1)
 	if err != nil {
