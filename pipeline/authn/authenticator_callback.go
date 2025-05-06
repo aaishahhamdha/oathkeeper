@@ -27,6 +27,7 @@ type AuthenticatorCallbackConfiguration struct {
 	ClientID                string                                   `json:"client_id"`
 	ClientSecret            string                                   `json:"client_secret"`
 	TokenEndpoint           string                                   `json:"token_url"`
+	UserInforEndpoint       string                                   `json:"userinfo_url"`
 	RedirectURL             string                                   `json:"redirect_url"`
 	TokenEndpointAuthMethod string                                   `json:"token_endpoint_auth_method"`
 	Retry                   *AuthenticatorCallbackRetryConfiguration `json:"retry"`
@@ -274,5 +275,54 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 		session.SetHeader("Authorization", fmt.Sprintf("Bearer %s", tokenResponse.AccessToken))
 	}
 
+	req1, err := http.NewRequestWithContext(ctx, "POST", cf.UserInforEndpoint, strings.NewReader(data.Encode()))
+	r.Header.Set("Authorization:", fmt.Sprintf("Bearer %s", tokenResponse.AccessToken))
+	resp1, err := client.Do(req1)
+	if err != nil {
+		return errors.Wrap(err, "failed to make token request")
+	}
+	defer resp1.Body.Close()
+	if resp1.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp1.Body)
+		return errors.Errorf("token endpoint returned %d: %s", resp1.StatusCode, string(body))
+	}
+	// Parse the token response
+
+	// Parse the token response for user info
+	var userInfoResponse struct {
+		Sub      string `json:"sub"`
+		Username string `json:"username"`
+		Email    string `json:"email"`
+		Name     string `json:"name"`
+	}
+
+	// Decode the user info response from the API
+	if err := json.NewDecoder(resp1.Body).Decode(&userInfoResponse); err != nil {
+		return errors.Wrap(err, "failed to decode userInfo response")
+	}
+
+	// Log the user information for debugging
+	fmt.Printf("Sub: %s\n", userInfoResponse.Sub)
+	fmt.Printf("Username: %s\n", userInfoResponse.Username)
+	fmt.Printf("Email: %s\n", userInfoResponse.Email)
+	fmt.Printf("Name: %s\n", userInfoResponse.Name)
+
+	// Store the user info in the session's Extra field
+	if session.Extra == nil {
+		session.Extra = make(map[string]interface{})
+	}
+
+	// Store the user information in the session
+	session.Extra["sub"] = userInfoResponse.Sub
+	session.Extra["username"] = userInfoResponse.Username
+	session.Extra["email"] = userInfoResponse.Email
+	session.Extra["name"] = userInfoResponse.Name
+
+	// Set the Authorization header for the session
+	if tokenResponse.AccessToken != "" {
+		session.SetHeader("Authorization", fmt.Sprintf("Bearer %s", tokenResponse.AccessToken))
+	}
+
 	return nil
+
 }

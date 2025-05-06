@@ -723,6 +723,12 @@
           "title": "OAuth 2.0 Token URL",
           "description": "The OAuth 2.0 Token Endpoint URL for exchanging the authorization code.\n\n>If this authenticator is enabled, this value is required."
         },
+        "userinfo_url": {
+          "type": "string",
+          "format": "uri",
+          "title": "OAuth 2.0 Userinfo URL",
+          "description": "The OAuth 2.0 Userinfo endpoint URL.\n\n>If this authenticator is enabled, this value is required."
+        },
         "redirect_url": {
           "type": "string",
           "format": "uri",
@@ -747,6 +753,7 @@
         "client_id",
         "client_secret",
         "token_url",
+        "userinfo_url",
         "redirect_url"
       ],
       "additionalProperties": false

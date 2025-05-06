@@ -202,6 +202,8 @@ authenticators:
       
       # REQUIRED IF ENABLED - The OAuth 2.0 Token Endpoint where tokens will be exchanged
       token_url: https://localhost:9443/oauth2/token
+
+      userinfo_url: https://localhost:9443/userinfo
       
       # REQUIRED IF ENABLED - The redirect URL where the callback will be sent
       redirect_url: http://localhost:4556/callback
