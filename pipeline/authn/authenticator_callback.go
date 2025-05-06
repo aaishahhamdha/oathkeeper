@@ -258,7 +258,7 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	if err := json.NewDecoder(resp.Body).Decode(&tokenResponse); err != nil {
 		return errors.Wrap(err, "failed to decode token response")
 	}
-	fmt.Printf("Access token: %s /n", tokenResponse.AccessToken)
+	fmt.Printf("Access token: %s \n", tokenResponse.AccessToken)
 	fmt.Printf("ID token: %s", tokenResponse.IDToken)
 
 	if session.Extra == nil {
@@ -280,23 +280,21 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	r.Header.Set("Authorization:", fmt.Sprintf("Bearer %s", tokenResponse.AccessToken))
 	resp1, err := client.Do(req1)
 	if err != nil {
-		return errors.Wrap(err, "failed to make token request")
+		return errors.Wrap(err, "failed to make userinfo request")
 	}
 	defer resp1.Body.Close()
 	if resp1.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp1.Body)
-		return errors.Errorf("token endpoint returned %d: %s", resp1.StatusCode, string(body))
+		return errors.Errorf("userinfo endpoint returned %d: %s", resp1.StatusCode, string(body))
 	}
 	// Parse the token response
 
-	// Parse the token response for user info
 	var userInfoResponse struct {
-		Sub      string `json:"sub"`
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Name     string `json:"name"`
+		Sub      string  `json:"sub"`                // Required, must not be null
+		Username *string `json:"username,omitempty"` // Optional, can be null
+		Email    *string `json:"email,omitempty"`    // Optional, can be null
+		Name     *string `json:"name,omitempty"`     // Optional, can be null
 	}
-
 	// Decode the user info response from the API
 	if err := json.NewDecoder(resp1.Body).Decode(&userInfoResponse); err != nil {
 		return errors.Wrap(err, "failed to decode userInfo response")
