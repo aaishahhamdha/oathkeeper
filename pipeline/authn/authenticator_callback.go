@@ -302,9 +302,21 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 
 	// Log the user information for debugging
 	fmt.Printf("Sub: %s\n", userInfoResponse.Sub)
-	fmt.Printf("Username: %s\n", userInfoResponse.Username)
-	fmt.Printf("Email: %s\n", userInfoResponse.Email)
-	fmt.Printf("Name: %s\n", userInfoResponse.Name)
+	if userInfoResponse.Username != nil {
+		fmt.Printf("Username: %s\n", *userInfoResponse.Username)
+	} else {
+		fmt.Println("Username: <nil>")
+	}
+	if userInfoResponse.Email != nil {
+		fmt.Printf("Email: %s\n", *userInfoResponse.Email)
+	} else {
+		fmt.Println("Email: <nil>")
+	}
+	if userInfoResponse.Name != nil {
+		fmt.Printf("Name: %s\n", *userInfoResponse.Name)
+	} else {
+		fmt.Println("Name: <nil>")
+	}
 
 	// Store the user info in the session's Extra field
 	if session.Extra == nil {
