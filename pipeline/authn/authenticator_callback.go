@@ -223,7 +223,7 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	fmt.Println("Client Secret:", cf.ClientSecret)
 	fmt.Println("Redirect URL:", cf.RedirectURL)
 	fmt.Println("Token Endpoint Auth Method:", cf.TokenEndpointAuthMethod)
-	a.logger.Infof("Token request URL: %s", cf.TokenEndpoint)
+	fmt.Println("Authorization Code:", authCode)
 
 	if err != nil {
 		return errors.Wrap(err, "failed to create token request")
