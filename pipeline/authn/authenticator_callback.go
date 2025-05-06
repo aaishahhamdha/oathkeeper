@@ -277,7 +277,7 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	}
 
 	req1, err := http.NewRequestWithContext(ctx, "GET", cf.UserInforEndpoint, strings.NewReader(data.Encode()))
-	r.Header.Set("Authorization:", fmt.Sprintf("Bearer %s", tokenResponse.AccessToken))
+	req1.Header.Set("Authorization", fmt.Sprintf("Bearer %s", tokenResponse.AccessToken))
 	resp1, err := client.Do(req1)
 	if err != nil {
 		return errors.Wrap(err, "failed to make userinfo request")
@@ -287,7 +287,6 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 		body, _ := io.ReadAll(resp1.Body)
 		return errors.Errorf("userinfo endpoint returned %d: %s", resp1.StatusCode, string(body))
 	}
-	// Parse the token response
 
 	var userInfoResponse struct {
 		Sub      string  `json:"sub"`                // Required, must not be null
