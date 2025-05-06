@@ -256,7 +256,7 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	if err := json.NewDecoder(resp.Body).Decode(&tokenResponse); err != nil {
 		return errors.Wrap(err, "failed to decode token response")
 	}
-	fmt.Printf("Access token: %s", tokenResponse.AccessToken)
+	fmt.Printf("Access token: %s /n", tokenResponse.AccessToken)
 	fmt.Printf("ID token: %s", tokenResponse.IDToken)
 
 	if session.Extra == nil {
@@ -271,7 +271,6 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 		session.Extra["id_token"] = tokenResponse.IDToken
 	}
 	if tokenResponse.AccessToken != "" {
-		r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", tokenResponse.AccessToken))
 		session.SetHeader("Authorization", fmt.Sprintf("Bearer %s", tokenResponse.AccessToken))
 	}
 
