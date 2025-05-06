@@ -729,7 +729,7 @@
           "title": "Callback Redirect URL",
           "description": "The URL where the authorization server will redirect after authorization.\n\n>If this authenticator is enabled, this value is required."
         },
-        "token_url_auth_method": {
+        "token_endpoint_auth_method": {
           "type": "string",
           "title": "Token Endpoint Authentication Method",
           "description": "The authentication method used at the token endpoint.",
