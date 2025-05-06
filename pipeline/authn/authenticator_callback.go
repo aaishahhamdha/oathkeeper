@@ -223,7 +223,6 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	fmt.Println("Client Secret:", cf.ClientSecret)
 	fmt.Println("Redirect URL:", cf.RedirectURL)
 	fmt.Println("Token Endpoint Auth Method:", cf.TokenEndpointAuthMethod)
-	fmt.Println("Authorization Code:", authCode)
 
 	if err != nil {
 		return errors.Wrap(err, "failed to create token request")
@@ -254,6 +253,7 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 		IDToken      string `json:"id_token"`
 	}
 
+	fmt.Println("Token response body:", resp.Body)
 	if err := json.NewDecoder(resp.Body).Decode(&tokenResponse); err != nil {
 		return errors.Wrap(err, "failed to decode token response")
 	}
