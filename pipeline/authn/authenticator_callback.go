@@ -218,6 +218,9 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 
 	// Now create the body
 	req, err := http.NewRequestWithContext(ctx, "POST", cf.TokenEndpoint, strings.NewReader(data.Encode()))
+	fmt.Println("Token request URL:", cf.TokenEndpoint)
+	a.logger.Infof("Token request URL: %s", cf.TokenEndpoint)
+
 	if err != nil {
 		return errors.Wrap(err, "failed to create token request")
 	}
