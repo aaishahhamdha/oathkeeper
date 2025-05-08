@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"text/template"
 
 	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
@@ -19,7 +20,7 @@ import (
 )
 
 type MutatorHeaderConfig struct {
-	Headers map[string]string `json:"headers"`
+	Headers map[string]interface{} `json:"headers"`
 }
 
 type MutatorHeader struct {
@@ -45,10 +46,23 @@ func (a *MutatorHeader) Mutate(_ *http.Request, session *authn.AuthenticationSes
 		return err
 	}
 
-	for hdr, templateString := range cfg.Headers {
-		var tmpl *template.Template
-		var err error
+	for hdr, templateValue := range cfg.Headers {
+		var templateString string
 
+		switch v := templateValue.(type) {
+		case string:
+			templateString = v
+		case []interface{}:
+			strParts := make([]string, len(v))
+			for i, part := range v {
+				strParts[i] = fmt.Sprint(part)
+			}
+			templateString = strings.Join(strParts, "")
+		default:
+			return errors.Errorf(`header template value has unexpected type %T for header "%s" in rule "%s"`, templateValue, hdr, rl.GetID())
+		}
+
+		var tmpl *template.Template
 		templateId := fmt.Sprintf("%s:%s", rl.GetID(), hdr)
 		tmpl = a.t.Lookup(templateId)
 		if tmpl == nil {
