@@ -191,14 +191,33 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 
 	requestURL := r.URL
 	authCode := requestURL.Query().Get("code")
+
 	if authCode != "" {
 		fmt.Println("Authorization code:", authCode)
 	} else {
 		fmt.Println("Authorization code not found in URL")
 	}
-	if authCode == "" {
-		return errors.New("authorization code not found in URL")
+	state := requestURL.Query().Get("state")
+	if state != "" {
+		fmt.Println("State:", state)
+	} else {
+		fmt.Println("State not found in URL")
 	}
+	authState := session.Header.Get("state") // Assuming session stores it in headers
+	if authState == "" {
+		return errors.New("no state found in session - possible session expiry")
+	}
+
+	// Compare the returned state with the stored state
+	if authState != state {
+		return errors.New("invalid state: possible CSRF attack")
+	}
+
+	// Clear the state from the session after validation
+	session.Header.Del("state")
+
+	// Proceed with token exchange...
+	fmt.Println("State is valid. Authorization code:", authCode)
 
 	// Prepare form data for token request
 	data := url.Values{}
