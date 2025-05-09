@@ -206,11 +206,15 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	authState := session.Header.Get("state") // Assuming session stores it in headers
 	if authState == "" {
 		return errors.New("no state found in session - possible session expiry")
+		fmt.Println("State not found in session")
+	} else {
+		fmt.Println("State from session:", authState)
 	}
 
 	// Compare the returned state with the stored state
 	if authState != state {
 		return errors.New("invalid state: possible CSRF attack")
+		fmt.Println("Invalid state: possible CSRF attack")
 	}
 
 	// Clear the state from the session after validation
