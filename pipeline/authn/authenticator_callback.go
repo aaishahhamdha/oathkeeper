@@ -325,7 +325,6 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	// Store the user information in the session
 	session.Extra["sub"] = userInfoResponse.Sub
 	session.Extra["username"] = userInfoResponse.Username
-	session.Extra["email"] = *userInfoResponse.Username + "@modified.com"
 	session.Extra["name"] = userInfoResponse.Name
 
 	// Set the Authorization header for the session
