@@ -14,7 +14,6 @@ import (
 
 	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
 	"github.com/aaishahhamdha/oathkeeper/pipeline"
-	"github.com/dgraph-io/ristretto"
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/otelx"
@@ -35,11 +34,10 @@ type AuthenticatorOIDCAuthorize struct {
 	c         configuration.Provider
 	clientMap map[string]*http.Client
 
-	mu         sync.RWMutex
-	tokenCache *ristretto.Cache[string, []byte]
-	cacheTTL   *time.Duration
-	logger     *logrusx.Logger
-	provider   trace.TracerProvider
+	mu       sync.RWMutex
+	cacheTTL *time.Duration
+	logger   *logrusx.Logger
+	provider trace.TracerProvider
 }
 
 // Authenticate implements Authenticator.
@@ -177,47 +175,6 @@ func (a *AuthenticatorOIDCAuthorize) Config(config json.RawMessage) (*Authentica
 		a.mu.Lock()
 		a.clientMap[clientKey] = client
 		a.mu.Unlock()
-	}
-
-	if c.Cache.TTL != "" {
-		cacheTTL, err := time.ParseDuration(c.Cache.TTL)
-		if err != nil {
-			return nil, nil, err
-		}
-
-		// clear cache if previous ttl was longer (or none)
-		if a.tokenCache != nil {
-			if a.cacheTTL == nil || (a.cacheTTL != nil && a.cacheTTL.Seconds() > cacheTTL.Seconds()) {
-				a.tokenCache.Clear()
-			}
-		}
-
-		a.cacheTTL = &cacheTTL
-	}
-
-	if a.tokenCache == nil {
-		cost := int64(c.Cache.MaxCost)
-		if cost == 0 {
-			cost = 100000000
-		}
-		a.logger.Debugf("Creating cache with max cost: %d", c.Cache.MaxCost)
-		cache, err := ristretto.NewCache(&ristretto.Config[string, []byte]{
-			// This will hold about 1000 unique mutation responses.
-			NumCounters: cost * 10,
-			// Allocate a max
-			MaxCost: cost,
-			// This is a best-practice value.
-			BufferItems: 64,
-			Cost: func(value []byte) int64 {
-				return 1
-			},
-			IgnoreInternalCost: true,
-		})
-		if err != nil {
-			return nil, nil, err
-		}
-
-		a.tokenCache = cache
 	}
 
 	return &c, client, nil
