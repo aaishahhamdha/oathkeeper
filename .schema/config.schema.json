@@ -433,25 +433,16 @@
       "type": "object",
       "title": "OIDC Authorize Authenticator Configuration",
       "description": "Configuration for OIDC Authorization Code flow authenticator",
-      "required": ["auth_url", "token_url", "client_id", "redirect_uri"],
+      "required": ["auth_url", "client_id", "redirect_uri","scopes"],
       "properties": {
         "auth_url": {
           "type": "string",
           "format": "uri",
           "description": "OIDC Provider's Authorization Endpoint URL"
         },
-        "token_url": {
-          "type": "string",
-          "format": "uri",
-          "description": "OIDC Provider's Token Endpoint URL"
-        },
         "client_id": {
           "type": "string",
           "description": "The client ID registered with the OIDC provider"
-        },
-        "client_secret": {
-          "type": "string",
-          "description": "The client secret registered with the OIDC provider"
         },
         "redirect_uri": {
           "type": "string",
@@ -465,42 +456,6 @@
           "description": "Scopes to request during authentication",
           "default": ["openid"],
           "examples": [["openid", "profile", "email"]]
-        },
-        "userinfo_url": {
-          "type": "string",
-          "format": "uri",
-          "description": "OIDC Provider's UserInfo Endpoint URL"
-        },
-        "jwks_url": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL of the provider's JWKS endpoint for token validation"
-        },
-        "issuer_url": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL of the OIDC issuer for discovery and validation"
-        },
-        "response_type": {
-          "type": "string",
-          "default": "code",
-          "description": "OAuth2 response type",
-          "enum": ["code", "id_token", "id_token token", "code id_token", "code token", "code id_token token"]
-        },
-        "use_pkce": {
-          "type": "boolean",
-          "default": true,
-          "description": "Whether to use PKCE (recommended for public clients)"
-        },
-        "state_ttl": {
-          "type": "string",
-          "default": "15m",
-          "description": "TTL for OAuth state parameter",
-          "examples": ["5m", "15m", "1h"]
-        },
-        "cookie_domain": {
-          "type": "string",
-          "description": "Domain attribute for OIDC session cookies"
         },
         "session_ttl": {
           "type": "string",

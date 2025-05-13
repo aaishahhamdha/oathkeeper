@@ -762,7 +762,7 @@
       "type": "object",
       "title": "OIDC Authorize Authenticator Configuration",
       "description": "Configuration for OIDC Authorization Code flow authenticator",
-      "required": ["auth_url", "token_url", "client_id", "redirect_uri"],
+      "required": ["auth_url", "client_id", "redirect_uri","scopes"],
       "properties": {
         "auth_url": {
           "type": "string",
@@ -785,6 +785,12 @@
           "description": "Scopes to request during authentication",
           "default": ["openid"],
           "examples": [["openid", "profile", "email"]]
+        },
+        "session_ttl": {
+          "type": "string",
+          "default": "1h",
+          "description": "TTL for authenticated sessions",
+          "examples": ["30m", "1h", "8h"]
         }
       },
       "additionalProperties": false
