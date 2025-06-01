@@ -4,6 +4,7 @@
 package proxy
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -317,6 +318,10 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 			return nil, err
 		}
 	}
+	// marked by Aaishah
+	// Store the fully processed session back in the context for later use
+	ctx := context.WithValue(r.Context(), ContextKeySession, session)
+	*r = *r.WithContext(ctx)
 
 	return session, nil
 }

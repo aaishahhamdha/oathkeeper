@@ -9,15 +9,18 @@ import (
 )
 
 type simpleResponseWriter struct {
-	header http.Header
-	code   int
-	buffer *bytes.Buffer
+	header    http.Header
+	buffer    *bytes.Buffer
+	code      int
+	sessionID string
 }
 
-func NewSimpleResponseWriter() *simpleResponseWriter {
+func NewSimpleResponseWriter(sessionID string) *simpleResponseWriter {
 	return &simpleResponseWriter{
-		header: http.Header{},
-		buffer: new(bytes.Buffer),
+		header:    http.Header{},
+		buffer:    bytes.NewBuffer([]byte{}),
+		code:      http.StatusOK,
+		sessionID: sessionID,
 	}
 }
 
@@ -31,4 +34,16 @@ func (r *simpleResponseWriter) Write(b []byte) (int, error) {
 
 func (r *simpleResponseWriter) WriteHeader(statusCode int) {
 	r.code = statusCode
+	if r.sessionID != "" {
+		SessionCookie := http.Cookie{
+			Name:     "wso2_session_id",
+			Value:    r.sessionID,
+			Path:     "/",
+			HttpOnly: true,
+			Secure:   true,
+			MaxAge:   3600, // 1 hour in seconds
+			SameSite: http.SameSiteLaxMode,
+		}
+		r.header.Add("Set-Cookie", SessionCookie.String())
+	}
 }

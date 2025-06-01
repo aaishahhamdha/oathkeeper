@@ -46,7 +46,18 @@ const (
 )
 
 func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
-	rw := NewSimpleResponseWriter()
+	sess, _ := r.Context().Value(ContextKeySession).(*authn.AuthenticationSession)
+	d.r.Logger().WithField("context", r.Context()).Debug("Request context information")
+	d.r.Logger().WithField("session", sess).Debug("Session information")
+	WSO2SessionID := ""
+	if sess != nil {
+		d.r.Logger().WithField("session_extra", sess.Extra).Debug("Session extra data")
+		d.r.Logger().WithField("session_header", sess.Header).Debug("Session header data")
+		WSO2SessionID = sess.Header.Get("wso2_session_id")
+		d.r.Logger().WithField("wso2_session_id", WSO2SessionID).Debug("WSO2 session ID from header")
+	}
+
+	rw := NewSimpleResponseWriter(WSO2SessionID)
 	fields := map[string]interface{}{
 		"http_method":     r.Method,
 		"http_url":        r.URL.String(),
@@ -87,6 +98,23 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 				WithField("granted", true).
 				WithFields(fields).
 				Info("Access request granted")
+
+			// Call WriteHeader on simpleResponseWriter to trigger session logging and cookie setting
+			// Use the status code from the actual response, or default to 200 if not available
+			statusCode := http.StatusOK
+			if res != nil {
+				statusCode = res.StatusCode
+			}
+			rw.WriteHeader(statusCode)
+
+			// Merge session cookies from simpleResponseWriter into the actual response
+			if res != nil && len(rw.header) > 0 {
+				for key, values := range rw.header {
+					for _, value := range values {
+						res.Header.Add(key, value)
+					}
+				}
+			}
 		}
 
 		return res, err
