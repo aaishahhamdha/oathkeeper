@@ -14,11 +14,13 @@ import (
 
 	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
 	"github.com/aaishahhamdha/oathkeeper/pipeline"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/session_store"
 	"github.com/dgraph-io/ristretto"
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/otelx"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -192,38 +194,30 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	requestURL := r.URL
 	authCode := requestURL.Query().Get("code")
 
-	if authCode != "" {
-		fmt.Println("Authorization code:", authCode)
-	} else {
-		fmt.Println("Authorization code not found in URL")
-	}
+	a.logger.WithField("auth_code_present", authCode != "").Debug("Processing authentication callback")
+
 	state := requestURL.Query().Get("state")
 	if state != "" {
-		fmt.Println("State:", state)
+		a.logger.Debug("State found in URL")
 	} else {
-		fmt.Println("State not found in URL")
-	}
-	authState := session.Header.Get("state") // Assuming session stores it in headers
-	if authState == "" {
-		return errors.New("no state found in session - possible session expiry")
-		fmt.Println("State not found in session")
-	} else {
-		fmt.Println("State from session:", authState)
+		a.logger.Debug("State not found in URL")
 	}
 
-	// Compare the returned state with the stored state
-	if authState != state {
-		return errors.New("invalid state: possible CSRF attack")
-		fmt.Println("Invalid state: possible CSRF attack")
+	if authCode == "" {
+		return errors.New("authorization code not found in callback URL")
 	}
 
-	// Clear the state from the session after validation
-	session.Header.Del("state")
+	if state == "" {
+		return errors.New("state parameter missing from callback request")
+	}
 
-	//Proceed with token exchange...
-	fmt.Println("State is valid. Authorization code:", authCode)
+	// Validate the state parameter (one-time use)
+	if !session_store.GlobalStore.ValidateAndRemoveState(state) {
+		return errors.New("invalid state: possible CSRF attack or session expiry")
+	}
 
-	//Prepare form data for token request
+	a.logger.Debug("State validated successfully. Proceeding with authorization code")
+
 	data := url.Values{}
 	data.Set("grant_type", "authorization_code")
 	data.Set("code", authCode)
@@ -233,21 +227,17 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	if cf.TokenEndpointAuthMethod == "client_secret_post" {
 		data.Set("client_id", cf.ClientID)
 		data.Set("client_secret", cf.ClientSecret)
-	} else if cf.TokenEndpointAuthMethod == "client_secret_basic" {
-		auth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", cf.ClientID, cf.ClientSecret)))
-		r.Header.Set("Authorization", fmt.Sprintf("Basic %s", auth))
-	} else {
-		return errors.Errorf("unsupported token endpoint auth method: %s", cf.TokenEndpointAuthMethod)
 	}
 
 	// Now create the body
 	req, err := http.NewRequestWithContext(ctx, "POST", cf.TokenEndpoint, strings.NewReader(data.Encode()))
-	fmt.Println("Token request URL:", cf.TokenEndpoint)
-	fmt.Println("Client ID:", cf.ClientID)
-	fmt.Println("Client Secret:", cf.ClientSecret)
-	fmt.Println("Redirect URL:", cf.RedirectURL)
-	fmt.Println("Token Endpoint Auth Method:", cf.TokenEndpointAuthMethod)
-	fmt.Println("User Info Endpoint:", cf.UserInforEndpoint)
+	a.logger.WithFields(logrus.Fields{
+		"token_endpoint":      cf.TokenEndpoint,
+		"client_id":           cf.ClientID,
+		"redirect_url":        cf.RedirectURL,
+		"token_endpoint_auth": cf.TokenEndpointAuthMethod,
+		"user_info_endpoint":  cf.UserInforEndpoint,
+	}).Debug("Creating token request")
 
 	if err != nil {
 		return errors.Wrap(err, "failed to create token request")
@@ -255,6 +245,14 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 
 	// Set headers
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	// Set client credentials for client_secret_basic after request creation
+	if cf.TokenEndpointAuthMethod == "client_secret_basic" {
+		auth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", cf.ClientID, cf.ClientSecret)))
+		req.Header.Set("Authorization", fmt.Sprintf("Basic %s", auth))
+	} else if cf.TokenEndpointAuthMethod != "client_secret_post" {
+		return errors.Errorf("unsupported token endpoint auth method: %s", cf.TokenEndpointAuthMethod)
+	}
 
 	// Make the request using the pre-configured client
 	resp, err := client.Do(req)
@@ -281,17 +279,14 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	if err := json.NewDecoder(resp.Body).Decode(&tokenResponse); err != nil {
 		return errors.Wrap(err, "failed to decode token response")
 	}
-	fmt.Printf("Access token: %s \n", tokenResponse.AccessToken)
-	fmt.Printf("ID token: %s", tokenResponse.IDToken)
+	a.logger.WithField("access_token", tokenResponse.AccessToken).Debug("Received access token")
+	a.logger.WithField("id_token", tokenResponse.IDToken).Debug("Received ID token")
 
 	if session.Extra == nil {
 		session.Extra = make(map[string]interface{})
 	}
-
 	// Store the access token in Extra
 	session.Extra["access_token"] = tokenResponse.AccessToken
-
-	// Store the ID token if present
 	if tokenResponse.IDToken != "" {
 		session.Extra["id_token"] = tokenResponse.IDToken
 	}
@@ -323,37 +318,60 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	}
 
 	// Log the user information for debugging
-	fmt.Printf("Sub: %s\n", userInfoResponse.Sub)
-	if userInfoResponse.Username != nil {
-		fmt.Printf("Username: %s\n", *userInfoResponse.Username)
-	} else {
-		fmt.Println("Username: <nil>")
-	}
-	if userInfoResponse.Email != nil {
-		fmt.Printf("Email: %s\n", *userInfoResponse.Email)
-	} else {
-		fmt.Println("Email: <nil>")
-	}
-	if userInfoResponse.Name != nil {
-		fmt.Printf("Name: %s\n", *userInfoResponse.Name)
-	} else {
-		fmt.Println("Name: <nil>")
-	}
+	a.logger.WithFields(logrus.Fields{
+		"sub":      userInfoResponse.Sub,
+		"username": userInfoResponse.Username,
+		"email":    userInfoResponse.Email,
+		"name":     userInfoResponse.Name,
+	}).Debug("Received user info")
 
 	// Store the user info in the session's Extra field
 	if session.Extra == nil {
 		session.Extra = make(map[string]interface{})
 	}
 
-	// Store the user information in the session
+	// Set the subject from the userinfo response
+	session.Subject = userInfoResponse.Sub
+
+	// Store the user information in the session, converting pointers to values
 	session.Extra["sub"] = userInfoResponse.Sub
-	session.Extra["username"] = userInfoResponse.Username
-	session.Extra["name"] = userInfoResponse.Name
+	if userInfoResponse.Username != nil {
+		session.Extra["username"] = *userInfoResponse.Username
+	}
+	if userInfoResponse.Name != nil {
+		session.Extra["name"] = *userInfoResponse.Name
+	}
 
 	// Set the Authorization header for the session
 	if tokenResponse.AccessToken != "" {
 		session.SetHeader("Authorization", fmt.Sprintf("Bearer %s", tokenResponse.AccessToken))
 	}
+	id, err := session_store.GenerateSessionID()
+	if err != nil {
+		a.logger.WithError(err).Fatal("Failed to generate session ID")
+		return err
+	}
+
+	// Create session for session store, handling nil username safely
+	username := ""
+	if userInfoResponse.Username != nil {
+		username = *userInfoResponse.Username
+	}
+
+	sess := session_store.Session{
+		ID:          id,
+		Username:    username,
+		Sub:         userInfoResponse.Sub,
+		IssuedAt:    time.Now(),
+		ExpiresAt:   time.Now().Add(1 * time.Hour),
+		AccessToken: tokenResponse.AccessToken,
+		IDToken:     tokenResponse.IDToken,
+	}
+	session_store.GlobalStore.AddSession(sess)
+	a.logger.WithField("session_id", id).Info("Generated and stored session")
+	a.logger.Debug("Setting session ID into authentication session")
+	session.SetHeader("wso2_session_id", id)
+	session.Extra["wso2_session_id"] = id
 	return nil
 
 }
