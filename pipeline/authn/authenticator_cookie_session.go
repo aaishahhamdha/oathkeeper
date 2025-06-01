@@ -16,6 +16,7 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/aaishahhamdha/oathkeeper/x/header"
+	"github.com/ory/x/logrusx"
 	"github.com/ory/x/otelx"
 	"github.com/ory/x/stringsx"
 
@@ -80,11 +81,12 @@ type AuthenticatorCookieSession struct {
 	c      configuration.Provider
 	client *http.Client
 	tracer trace.Tracer
+	logger *logrusx.Logger
 }
 
 var _ AuthenticatorForwardConfig = new(AuthenticatorCookieSessionConfiguration)
 
-func NewAuthenticatorCookieSession(c configuration.Provider, provider trace.TracerProvider) *AuthenticatorCookieSession {
+func NewAuthenticatorCookieSession(c configuration.Provider, provider trace.TracerProvider, logger *logrusx.Logger) *AuthenticatorCookieSession {
 	return &AuthenticatorCookieSession{
 		c: c,
 		client: &http.Client{
@@ -94,6 +96,7 @@ func NewAuthenticatorCookieSession(c configuration.Provider, provider trace.Trac
 			),
 		},
 		tracer: provider.Tracer("oauthkeeper/pipeline/authn"),
+		logger: logger,
 	}
 }
 
@@ -137,14 +140,14 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *Auth
 
 	cf, err := a.Config(config)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	if !cookieSessionResponsible(r, cf.Only) {
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(a.client, r, cf)
+	body, err := a.forwardRequestToSessionStore(a.client, r, cf)
 	if err != nil {
 		return err
 	}
@@ -171,8 +174,8 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *Auth
 }
 
 func cookieSessionResponsible(r *http.Request, only []string) bool {
-	if len(only) == 0 && len(r.Cookies()) > 0 {
-		return true
+	if len(only) == 0 {
+		return len(r.Cookies()) > 0
 	}
 
 	for _, cookieName := range only {
@@ -184,15 +187,17 @@ func cookieSessionResponsible(r *http.Request, only []string) bool {
 	return false
 }
 
-func forwardRequestToSessionStore(client *http.Client, r *http.Request, cf AuthenticatorForwardConfig) (json.RawMessage, error) {
+func (a *AuthenticatorCookieSession) forwardRequestToSessionStore(client *http.Client, r *http.Request, cf AuthenticatorForwardConfig) (json.RawMessage, error) {
 	req, err := PrepareRequest(r, cf)
 	if err != nil {
+		a.logger.WithError(err).Error("Failed to prepare request to session store")
 		return nil, err
 	}
 
+	a.logger.WithField("url", req.URL.String()).Debug("Forwarding request to session store")
 	res, err := client.Do(req.WithContext(r.Context()))
-
 	if err != nil {
+		a.logger.WithError(err).Error("Failed to forward request to session store")
 		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
 	}
 
@@ -201,10 +206,13 @@ func forwardRequestToSessionStore(client *http.Client, r *http.Request, cf Authe
 	if res.StatusCode == http.StatusOK {
 		body, err := io.ReadAll(res.Body)
 		if err != nil {
+			a.logger.WithError(err).Error("Failed to read response body from session store")
 			return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to fetch cookie session context from remote: %+v", err))
 		}
+		a.logger.WithField("status_code", res.StatusCode).Debug("Successfully received response from session store")
 		return body, nil
 	} else {
+		a.logger.WithField("status_code", res.StatusCode).Debug("Received non-OK response from session store")
 		return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized)
 	}
 }
@@ -215,12 +223,14 @@ func PrepareRequest(r *http.Request, cf AuthenticatorForwardConfig) (http.Reques
 		return http.Request{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse session check URL: %s", err))
 	}
 
-	if !cf.GetPreservePath() {
-		reqURL.Path = r.URL.Path
-	}
-
+	// If preserve_query is false, use query from original request (overwrite check_session_url query)
 	if !cf.GetPreserveQuery() {
 		reqURL.RawQuery = r.URL.RawQuery
+	}
+
+	// If preserve_path is false, use path from original request (overwrite check_session_url path)
+	if !cf.GetPreservePath() {
+		reqURL.Path = r.URL.Path
 	}
 
 	m := cf.GetForceMethod()
