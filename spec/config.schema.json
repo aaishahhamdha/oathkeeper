@@ -208,6 +208,25 @@
       "additionalProperties": false,
       "required": ["to"],
       "properties": {
+        "type": {
+          "title": "Redirect Type",
+          "description": "Defines the type of redirect: 'auth' for authentication with CSRF protection, 'logout' for logout flows, or 'none' for simple redirects.",
+          "type": "string",
+          "enum": ["auth", "logout", "none"],
+          "default": "none"
+        },
+        "oidc_logout_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "The URL to redirect to after logout.",
+          "examples": ["https://my-app.com/logout"]
+        },
+        "post_logout_redirect_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "The URL to redirect to after logout.",
+          "examples": ["https://my-app.com/after-logout"]
+        },
         "to": {
           "title": "Redirect to",
           "description": "Set the redirect target. Can either be a http/https URL, or a relative URL.",
@@ -654,6 +673,76 @@
       },
       "additionalProperties": false
     },
+    "configAuthenticatorsSessionJwt": {
+      "type": "object",
+      "title": "JWT Authenticator Configuration",
+      "description": "This section is optional when the authenticator is disabled.",
+      "required": ["jwks_urls"],
+      "properties": {
+        "required_scope": {
+          "type": "array",
+          "title": "Required Token Scope",
+          "description": "An array of OAuth 2.0 scopes that are required when accessing an endpoint protected by this handler.\n If the token used in the Authorization header did not request that specific scope, the request is denied.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "target_audience": {
+          "title": "Intended Audience",
+          "type": "array",
+          "description": "An array of audiences that are required when accessing an endpoint protected by this handler.\n If the token used in the Authorization header is not intended for any of the requested audiences, the request is denied.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "trusted_issuers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowed_algorithms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "jwks_urls": {
+          "title": "JSON Web Key URLs",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": "URLs where ORY Oathkeeper can retrieve JSON Web Keys from for validating the JSON Web Token. Usually something like \"https://my-keys.com/.well-known/jwks.json\". The response of that endpoint must return a JSON Web Key Set (JWKS).\n\n>If this authenticator is enabled, this value is required.",
+          "examples": [
+            [
+              "https://my-website.com/.well-known/jwks.json",
+              "https://my-other-website.com/.well-known/jwks.json",
+              "file://path/to/local/jwks.json"
+            ]
+          ]
+        },
+        "jwks_max_wait": {
+          "title": "Max await interval for the JWK fetch",
+          "type": "string",
+          "description": "The configuration which sets the max wait threshold when fetching new JWKs",
+          "default": "1s",
+          "examples": ["100ms", "1s"]
+        },
+        "jwks_ttl": {
+          "title": "JWK cache TTL configuration",
+          "type": "string",
+          "description": "The time interval for which fetched JWKs are cached",
+          "default": "30s",
+          "examples": ["30m", "6h"]
+        },
+        "scope_strategy": {
+          "$ref": "#/definitions/scopeStrategy"
+        }
+      },
+      "additionalProperties": false
+    },
     "configAuthenticatorsOauth2ClientCredentials": {
       "type": "object",
       "title": "OAuth 2.0 Client Credentials Authenticator Configuration",
@@ -758,43 +847,27 @@
       ],
       "additionalProperties": false
     },
-    "configAuthenticatorsOidcAuthorize": {
+    "configAuthenticatorsLogout":{
       "type": "object",
-      "title": "OIDC Authorize Authenticator Configuration",
-      "description": "Configuration for OIDC Authorization Code flow authenticator",
-      "required": ["auth_url", "client_id", "redirect_uri","scopes"],
+      "title": "Logout Authenticator Configuration",
+      "description": "This section is optional when the authenticator is disabled.",
       "properties": {
-        "auth_url": {
+        "oidc_logout_url": {
           "type": "string",
           "format": "uri",
-          "description": "OIDC Provider's Authorization Endpoint URL"
+          "description": "The URL to redirect to after logout.",
+          "examples": ["https://my-app.com/logout"]
         },
-        "client_id": {
-          "type": "string",
-          "description": "The client ID registered with the OIDC provider"
-        },
-        "redirect_uri": {
+        "post_logout_redirect_url": {
           "type": "string",
           "format": "uri",
-          "description": "URI where OIDC provider will redirect after authentication",
-          "examples": ["https://my-app.com/callback"]
-        },
-        "scopes": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Scopes to request during authentication",
-          "default": ["openid"],
-          "examples": [["openid", "profile", "email"]]
-        },
-        "session_ttl": {
-          "type": "string",
-          "default": "1h",
-          "description": "TTL for authenticated sessions",
-          "examples": ["30m", "1h", "8h"]
+          "description": "The URL to redirect to after logout.",
+          "examples": ["https://my-app.com/after-logout"]
         }
       },
       "additionalProperties": false
-  },
+
+    },
     "configAuthenticatorsOauth2Introspection": {
       "type": "object",
       "title": "OAuth 2.0 Introspection Authenticator Configuration",
@@ -1247,6 +1320,66 @@
         }
       },
       "additionalProperties": false
+    },
+    "configSessionStore": {
+      "type": "object",
+      "title": "Session Store Configuration",
+      "description": "Configuration for the session store backend. Defaults to in-memory storage if not specified.",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "title": "Session Store Type",
+          "description": "The type of session store to use. 'memory' for in-memory storage (default), 'redis' for Redis backend.",
+          "enum": ["memory", "redis"],
+          "default": "memory"
+        },
+        "redis": {
+          "type": "object",
+          "title": "Redis Configuration",
+          "description": "Redis-specific configuration. Only used when type is 'redis'.",
+          "additionalProperties": false,
+          "properties": {
+            "addr": {
+              "type": "string",
+              "title": "Redis Address",
+              "description": "Redis server address in the format host:port."
+            },
+            "password": {
+              "type": "string",
+              "title": "Redis Password",
+              "description": "Password for Redis authentication. Leave empty if no authentication is required."
+            },
+            "db": {
+              "type": "integer",
+              "title": "Redis Database",
+              "description": "Redis database number to use.",
+              "default": 0,
+              "minimum": 0,
+              "maximum": 15
+            },
+            "session_prefix": {
+              "type": "string",
+              "title": "Session Key Prefix",
+              "description": "Prefix for session keys in Redis.",
+              "default": "session:"
+            },
+            "state_prefix": {
+              "type": "string",
+              "title": "State Key Prefix",
+              "description": "Prefix for state keys in Redis (used for CSRF protection).",
+              "default": "state:"
+            },
+            "ttl": {
+              "type": "string",
+              "title": "Time To Live",
+              "description": "Default TTL for session data in Redis.",
+              "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+              "default": "24h"
+            }
+          }
+        }
+      }
     }
   },
   "properties": {
@@ -1534,6 +1667,36 @@
             }
           ]
         },
+        "session_jwt": {
+          "title": "JSON Web Token (jwt)",
+          "description": "The [`jwt` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#session_jwt).",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "enabled": {
+                  "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configAuthenticatorsSessionJwt"
+                }
+              },
+              "required": ["config"]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
+            }
+          ]
+        },
         "oauth2_client_credentials": {
           "title": "OAuth 2.0 Client Credentials",
           "description": "The [`oauth2_client_credentials` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#oauth2_client_credentials).",
@@ -1565,65 +1728,49 @@
           ]
         },
         "callback": {
-      "title": "Callback Authenticator",
-      "description": "The [`callback` authenticator] for handling OAuth 2.0 callback flows.",
-      "type": "object",
-      "properties": {
-        "enabled": {
-          "$ref": "#/definitions/handlerSwitch"
-        }
-      },
-      "oneOf": [
-        {
+          "title": "Callback Authenticator",
+          "description": "The [`callback` authenticator] for handling OAuth 2.0 callback flows.",
+          "type": "object",
           "properties": {
             "enabled": {
-              "const": true
+              "$ref": "#/definitions/handlerSwitch"
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "enabled": {
+                  "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configAuthenticatorsCallback"
+                }
+              },
+              "required": ["config"]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
+            }
+          ]
+        },
+        "logout": {
+          "title": "Logout Authenticator",
+          "description": "The [`logout` authenticator] for handling OAuth 2.0 logout flows.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
             },
             "config": {
-              "$ref": "#/definitions/configAuthenticatorsCallback"
-            }
-          },
-          "required": ["config"]
-        },
-        {
-          "properties": {
-            "enabled": {
-              "const": false
+              "$ref": "#/definitions/configAuthenticatorsLogout"
             }
           }
-        }
-      ]
-    },
-    "oidc_authorize": {
-    "title": "OIDC Authorize",
-    "description": "The OIDC Authorization Code flow authenticator",
-    "type": "object",
-    "properties": {
-      "enabled": {
-        "$ref": "#/definitions/handlerSwitch"
-      }
-    },
-    "oneOf": [
-      {
-        "properties": {
-          "enabled": {
-            "const": true
-          },
-          "config": {
-            "$ref": "#/definitions/configAuthenticatorsOidcAuthorize"
-          }
         },
-        "required": ["config"]
-      },
-      {
-        "properties": {
-          "enabled": {
-            "const": false
-          }
-        }
-      }
-    ]
-  },
         "oauth2_introspection": {
           "title": "OAuth 2.0 Token Introspection",
           "description": "The [`oauth2_introspection` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#oauth2_introspection).",
@@ -1942,6 +2089,17 @@
             }
           ]
         },
+"set-cookie": {
+  "title": "HTTP Set Cookie",
+  "description": "Sets a hardcoded session cookie.",
+  "type": "object",
+  "properties": {
+    "enabled": {
+      "$ref": "#/definitions/handlerSwitch"
+    }
+  },
+  "additionalProperties": false
+},
         "header": {
           "title": "HTTP Header",
           "description": "The [`header` mutator](https://www.ory.sh/oathkeeper/docs/pipeline/mutator#header).",
@@ -2002,6 +2160,7 @@
             }
           ]
         },
+
         "id_token": {
           "title": "ID Token (JSON Web Token)",
           "description": "The [`id_token` mutator](https://www.ory.sh/oathkeeper/docs/pipeline/mutator#id_token).",
@@ -2051,6 +2210,11 @@
       "title": "The Oathkeeper version this config is written for.",
       "description": "SemVer according to https://semver.org/ prefixed with `v` as in our releases.",
       "pattern": "^v(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "session_store": {
+      "title": "Session Store",
+      "description": "Configuration for the session store backend used by Oathkeeper.",
+      "$ref": "#/definitions/configSessionStore"
     }
   },
   "required": [],
