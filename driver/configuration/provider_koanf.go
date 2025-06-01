@@ -33,6 +33,7 @@ import (
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/watcherx"
 
+	"github.com/aaishahhamdha/oathkeeper/pipeline/session_store"
 	schema "github.com/aaishahhamdha/oathkeeper/spec"
 	"github.com/aaishahhamdha/oathkeeper/x"
 )
@@ -452,4 +453,53 @@ func (v *KoanfProvider) TLSConfig(daemon string) *TLSConfig {
 		v.l.Logger.Warnf("Failed to unmarshal TLS config for %s: %v", daemon, err)
 	}
 	return c
+}
+
+// Constants for session store configuration keys
+const (
+	SessionStoreKey      = "session_store"
+	SessionStoreTypeKey  = "session_store.type"
+	SessionStoreRedisKey = "session_store.redis"
+)
+
+// SessionStoreIsEnabled returns true if a session store is configured
+func (v *KoanfProvider) SessionStoreIsEnabled() bool {
+	return v.source.Exists(SessionStoreKey)
+}
+
+// SessionStoreConfig returns the session store configuration
+func (v *KoanfProvider) SessionStoreConfig() (*session_store.StoreConfig, error) {
+	v.l.WithField("session_store_enabled", v.SessionStoreIsEnabled()).Debug("Checking session store configuration")
+
+	if !v.SessionStoreIsEnabled() {
+		// Return default config if not explicitly configured
+		config := session_store.StoreConfig{
+			Type: session_store.InMemoryStore,
+		}
+		v.l.Debug("Using default in-memory session store configuration")
+		return &config, nil
+	}
+
+	var config session_store.StoreConfig
+	v.l.WithField("config_key", SessionStoreKey).Debug("Attempting to unmarshal session store config")
+	if err := v.source.Unmarshal(SessionStoreKey, &config); err != nil {
+		v.l.WithError(err).Error("Failed to unmarshal session store config")
+		return nil, errors.WithStack(err)
+	}
+
+	v.l.WithField("store_type", config.Type).Debug("Successfully loaded session store config")
+
+	// If Redis is configured, parse the TTL
+	if config.Type == session_store.RedisStoreType && config.Redis.TTL != "" {
+		v.l.WithField("ttl_string", config.Redis.TTL).Debug("Parsing Redis TTL")
+		ttl, err := time.ParseDuration(config.Redis.TTL)
+		if err != nil {
+			v.l.WithError(err).Error("Failed to parse Redis TTL")
+			return nil, errors.WithStack(err)
+		}
+		config.Redis.ParsedTTL = ttl
+		v.l.WithField("parsed_ttl", ttl).Debug("Successfully parsed Redis TTL")
+	}
+
+	return &config, nil
 }
