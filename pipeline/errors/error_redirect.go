@@ -53,6 +53,8 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 	r.URL.Host = x.OrDefaultString(r.Header.Get(xForwardedHost), r.URL.Host)
 	r.URL.Path = x.OrDefaultString(r.Header.Get(xForwardedUri), r.URL.Path)
 
+	state := r.URL.Query().Get("state")
+	r.Header.Set("state", state)
 	http.Redirect(w, r, a.RedirectURL(r.URL, c), c.Code)
 	return nil
 }
