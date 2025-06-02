@@ -141,8 +141,6 @@ func (a *AuthenticatorCallback) Config(config json.RawMessage) (*AuthenticatorCa
 		if err != nil {
 			return nil, nil, err
 		}
-
-		// clear cache if previous ttl was longer (or none)
 		if a.tokenCache != nil {
 			if a.cacheTTL == nil || (a.cacheTTL != nil && a.cacheTTL.Seconds() > cacheTTL.Seconds()) {
 				a.tokenCache.Clear()
@@ -159,11 +157,8 @@ func (a *AuthenticatorCallback) Config(config json.RawMessage) (*AuthenticatorCa
 		}
 		a.logger.Debugf("Creating cache with max cost: %d", c.Cache.MaxCost)
 		cache, err := ristretto.NewCache(&ristretto.Config[string, []byte]{
-			// This will hold about 1000 unique mutation responses.
 			NumCounters: cost * 10,
-			// Allocate a max
-			MaxCost: cost,
-			// This is a best-practice value.
+			MaxCost:     cost,
 			BufferItems: 64,
 			Cost: func(value []byte) int64 {
 				return 1
@@ -211,7 +206,6 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 		return errors.New("state parameter missing from callback request")
 	}
 
-	// Validate the state parameter (one-time use)
 	if !session_store.GlobalStore.ValidateAndRemoveState(state) {
 		return errors.New("invalid state: possible CSRF attack or session expiry")
 	}
@@ -223,13 +217,11 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	data.Set("code", authCode)
 	data.Set("redirect_uri", cf.RedirectURL)
 
-	// Set client credentials for client_secret_post
 	if cf.TokenEndpointAuthMethod == "client_secret_post" {
 		data.Set("client_id", cf.ClientID)
 		data.Set("client_secret", cf.ClientSecret)
 	}
 
-	// Now create the body
 	req, err := http.NewRequestWithContext(ctx, "POST", cf.TokenEndpoint, strings.NewReader(data.Encode()))
 	a.logger.WithFields(logrus.Fields{
 		"token_endpoint":      cf.TokenEndpoint,
@@ -243,10 +235,8 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 		return errors.Wrap(err, "failed to create token request")
 	}
 
-	// Set headers
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	// Set client credentials for client_secret_basic after request creation
 	if cf.TokenEndpointAuthMethod == "client_secret_basic" {
 		auth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", cf.ClientID, cf.ClientSecret)))
 		req.Header.Set("Authorization", fmt.Sprintf("Basic %s", auth))
@@ -254,20 +244,17 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 		return errors.Errorf("unsupported token endpoint auth method: %s", cf.TokenEndpointAuthMethod)
 	}
 
-	// Make the request using the pre-configured client
 	resp, err := client.Do(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to make token request")
 	}
 	defer resp.Body.Close()
 
-	// Check for non-200 status
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
 		return errors.Errorf("token endpoint returned %d: %s", resp.StatusCode, string(body))
 	}
 
-	// Parse the token response
 	var tokenResponse struct {
 		AccessToken  string `json:"access_token"`
 		TokenType    string `json:"token_type"`
@@ -285,7 +272,6 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	if session.Extra == nil {
 		session.Extra = make(map[string]interface{})
 	}
-	// Store the access token in Extra
 	session.Extra["access_token"] = tokenResponse.AccessToken
 	if tokenResponse.IDToken != "" {
 		session.Extra["id_token"] = tokenResponse.IDToken

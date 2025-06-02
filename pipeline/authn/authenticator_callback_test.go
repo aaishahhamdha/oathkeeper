@@ -1,6 +1,3 @@
-// Copyright © 2023 Ory Corp
-// SPDX-License-Identifier: Apache-2.0
-
 package authn_test
 
 import (
@@ -30,7 +27,6 @@ func TestAuthenticatorCallback(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
 
-	// Initialize session store for testing
 	session_store.GlobalStore = session_store.NewStore()
 
 	a, err := reg.PipelineAuthenticator("callback")
@@ -70,10 +66,8 @@ func TestAuthenticatorCallback(t *testing.T) {
 				}`),
 				expectErr: false,
 				setup: func(t *testing.T, router *httprouter.Router) {
-					// Add state to session store for validation
 					session_store.GlobalStore.AddStateEntry("valid_state", "127.0.0.1", "test-agent")
 
-					// Mock token endpoint
 					router.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 						err := r.ParseForm()
 						require.NoError(t, err)
@@ -93,7 +87,6 @@ func TestAuthenticatorCallback(t *testing.T) {
 						})
 					})
 
-					// Mock userinfo endpoint
 					router.GET("/oauth2/userinfo", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 						auth := r.Header.Get("Authorization")
 						assert.Equal(t, "Bearer test_access_token", auth)
@@ -140,10 +133,8 @@ func TestAuthenticatorCallback(t *testing.T) {
 				}`),
 				expectErr: false,
 				setup: func(t *testing.T, router *httprouter.Router) {
-					// Add state to session store for validation
 					session_store.GlobalStore.AddStateEntry("valid_state_basic", "127.0.0.1", "test-agent")
 
-					// Mock token endpoint with basic auth
 					router.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 						username, password, ok := r.BasicAuth()
 						assert.True(t, ok)
@@ -159,7 +150,6 @@ func TestAuthenticatorCallback(t *testing.T) {
 						})
 					})
 
-					// Mock userinfo endpoint
 					router.GET("/oauth2/userinfo", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 						w.Header().Set("Content-Type", "application/json")
 						w.WriteHeader(http.StatusOK)
@@ -204,7 +194,6 @@ func TestAuthenticatorCallback(t *testing.T) {
 						assert.Equal(t, tc.expectSess.Extra["sub"], sess.Extra["sub"])
 						assert.Equal(t, tc.expectSess.Extra["username"], sess.Extra["username"])
 						assert.Equal(t, tc.expectSess.Extra["name"], sess.Extra["name"])
-						// Check that session ID was set
 						assert.NotEmpty(t, sess.Extra["wso2_session_id"])
 						assert.NotEmpty(t, sess.Header.Get("wso2_session_id"))
 					}
@@ -214,7 +203,6 @@ func TestAuthenticatorCallback(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		// Create a configuration provider that skips validation
 		logger := logrusx.New("", "")
 		testConf, err := configuration.NewKoanfProvider(
 			context.Background(),
@@ -228,7 +216,6 @@ func TestAuthenticatorCallback(t *testing.T) {
 		testAuth, err := testReg.PipelineAuthenticator("callback")
 		require.NoError(t, err)
 
-		// Test with authenticator enabled and valid config
 		testConf.SetForTest(t, configuration.AuthenticatorCallbackIsEnabled, true)
 
 		validConfig := json.RawMessage(`{
@@ -240,11 +227,9 @@ func TestAuthenticatorCallback(t *testing.T) {
 		}`)
 		require.NoError(t, testAuth.Validate(validConfig))
 
-		// Test with invalid config (missing required fields)
 		invalidConfig := json.RawMessage(`{"client_id": ""}`)
 		require.Error(t, testAuth.Validate(invalidConfig))
 
-		// Test with authenticator disabled
 		testConf.SetForTest(t, configuration.AuthenticatorCallbackIsEnabled, false)
 		require.Error(t, testAuth.Validate(validConfig))
 	})

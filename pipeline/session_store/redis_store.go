@@ -26,14 +26,12 @@ func (r *RedisStore) CleanExpired() {
 	// No action needed as Redis handles expiration automatically
 }
 
-// CleanExpiredStates implements SessionStorer.
 func (r *RedisStore) CleanExpiredStates(maxAge time.Duration) {
 	// Redis automatically removes expired keys, so we don't need to manually clean them
 	// This method is implemented to satisfy the SessionStorer interface
 	// No action needed as Redis handles expiration automatically
 }
 
-// GetSessionCount implements SessionStorer.
 func (r *RedisStore) GetSessionCount() int {
 	// Use KEYS command with the session prefix pattern to count sessions
 	keys, err := r.client.Keys(r.ctx, r.sessionPrefix+"*").Result()
@@ -43,7 +41,6 @@ func (r *RedisStore) GetSessionCount() int {
 	return len(keys)
 }
 
-// SessionExists implements SessionStorer.
 func (r *RedisStore) SessionExists(id string) bool {
 	exists, err := r.client.Exists(r.ctx, r.sessionPrefix+id).Result()
 	if err != nil {
@@ -52,7 +49,6 @@ func (r *RedisStore) SessionExists(id string) bool {
 	return exists == 1
 }
 
-// ValidateAndRemoveState implements SessionStorer.
 func (r *RedisStore) ValidateAndRemoveState(ctx context.Context, state string) (string, error) {
 	key := r.statePrefix + state
 	data, err := r.client.GetDel(ctx, key).Result()
@@ -65,7 +61,7 @@ func (r *RedisStore) ValidateAndRemoveState(ctx context.Context, state string) (
 	return data, nil
 }
 
-// RedisConfig holds configuration for Redis connection
+// Configuration for Redis connection
 type RedisConfig struct {
 	Addr          string        `json:"addr"`
 	Password      string        `json:"password"`
@@ -73,7 +69,7 @@ type RedisConfig struct {
 	SessionPrefix string        `json:"session_prefix"`
 	StatePrefix   string        `json:"state_prefix"`
 	TTL           string        `json:"ttl"`
-	ParsedTTL     time.Duration `json:"-"` // Not serialized, used internally
+	ParsedTTL     time.Duration `json:"-"`
 }
 
 // NewRedisStore creates a new Redis-backed session store
@@ -152,7 +148,6 @@ func (r *RedisStore) GetSession(id string) (Session, bool) {
 	return sess, true
 }
 
-// Implement remaining methods of the SessionStorer interface
 // DeleteSession removes a session from Redis
 func (r *RedisStore) DeleteSession(id string) {
 	r.client.Del(r.ctx, r.sessionPrefix+id)
@@ -193,8 +188,5 @@ func (r *RedisStore) AddStateEntry(state string, ip, userAgent string) {
 		return
 	}
 
-	// Store with default TTL (typically used for short-lived state tokens)
 	r.client.Set(r.ctx, r.statePrefix+state, data, r.defaultTTL)
 }
-
-// Additional methods implementation...

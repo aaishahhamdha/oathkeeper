@@ -11,23 +11,17 @@ import (
 type StoreType string
 
 const (
-	// InMemoryStore uses the default in-memory implementation
-	InMemoryStore StoreType = "memory"
-	// RedisStore uses Redis as the backend
+	InMemoryStore  StoreType = "memory"
 	RedisStoreType StoreType = "redis"
 )
 
 // StoreConfig holds configuration for the session store
 type StoreConfig struct {
-	// Type of store to use (memory, redis)
-	Type StoreType `json:"type"`
-
-	// Redis specific configuration, only used when Type is "redis"
+	Type  StoreType   `json:"type"`
 	Redis RedisConfig `json:"redis,omitempty"`
 }
 
 // InitializeSessionStore creates and returns a SessionStorer based on the provided configuration
-// This function uses a default logger for backward compatibility
 func InitializeSessionStore(config StoreConfig) (SessionStorer, error) {
 	fmt.Printf("SESSION_STORE: Initializing session store with type: %s\n", config.Type)
 
@@ -62,17 +56,14 @@ func InitializeFromJSON(configJSON []byte) (SessionStorer, error) {
 	return InitializeSessionStore(config)
 }
 
-// redisStoreAdapter adapts RedisStore to implement the SessionStorer interface
 type redisStoreAdapter struct {
 	store *RedisStore
 }
 
-// AddSession implements SessionStorer by forwarding to RedisStore with context
 func (a *redisStoreAdapter) AddSession(sess Session) {
 	_ = a.store.AddSession(context.Background(), sess)
 }
 
-// Other methods to implement the SessionStorer interface...
 func (a *redisStoreAdapter) GetSession(id string) (Session, bool) {
 	return a.store.GetSession(id)
 }
