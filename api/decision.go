@@ -109,7 +109,6 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 		WithField("granted", true).
 		Info("Access request granted")
 
-	// marked by Aaishah
 	// Copy headers from the authentication session to the response
 	for k := range s.Header {
 		// Avoid copying the original Content-Length header from the client
@@ -122,8 +121,8 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 
 	// Copy cookies from the authentication session to the response
 	copyCookies(w, s.Header)
-	sessionID := s.Header.Get("wso2_session_id")
-	h.r.Logger().WithField("wso2_session_id", sessionID).Debug("Session ID from header in decision")
+	sessionID := s.Header.Get("IG_SESSION_ID")
+	h.r.Logger().WithField("IG_SESSION_ID", sessionID).Debug("Session ID from header in decision")
 	h.r.Logger().WithField("extra_info", s.Extra).Debug("Session extra information")
 	// If there's session data in Extra that needs to be sent to the client
 	if s.Extra != nil {

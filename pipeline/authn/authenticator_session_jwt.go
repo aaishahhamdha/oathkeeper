@@ -90,7 +90,7 @@ func (a *AuthenticatorSessionJWT) Authenticate(r *http.Request, session *Authent
 		return err
 	}
 
-	Cookie, err := r.Cookie("wso2_session_id")
+	Cookie, err := r.Cookie("IG_SESSION_ID")
 	if err != nil {
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
@@ -153,12 +153,12 @@ func (a *AuthenticatorSessionJWT) Authenticate(r *http.Request, session *Authent
 	session.Extra["sub"] = sess.Sub
 	session.Extra["username"] = sess.Username
 	session.Extra["name"] = sess.Username // Using Username as Name if not available
-	session.Extra["wso2_session_id"] = Cookie.Value
+	session.Extra["IG_SESSION_ID"] = Cookie.Value
 	session.Extra["id_token"] = sess.IDToken
 	session.Extra["access_token"] = sess.AccessToken
 
 	// Add all relevant data to headers
-	session.SetHeader("wso2_session_id", Cookie.Value)
+	session.SetHeader("IG_SESSION_ID", Cookie.Value)
 	session.SetHeader("sub", sess.Sub)
 	session.SetHeader("username", sess.Username)
 	return nil

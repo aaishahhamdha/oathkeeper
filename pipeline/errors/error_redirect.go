@@ -89,7 +89,7 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 		}
 
 		// Get session ID from cookie
-		sessionCookie, err := r.Cookie("wso2_session_id")
+		sessionCookie, err := r.Cookie("IG_SESSION_ID")
 		var idTokenHint string
 		if err == nil && sessionCookie != nil {
 			a.d.Logger().WithField("session_id", sessionCookie.Value).Debug("Logout: Found session cookie")
@@ -121,9 +121,9 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 			}).Debug("Logout verification: Session deletion status")
 			session_store.GlobalStore.CleanExpired()
 
-			// Remove the wso2_session_id cookie from the client's browser
+			// Remove the IG_SESSION_ID cookie from the client's browser
 			a.clearSessionCookie(w)
-			a.d.Logger().Info("Logout: Cleared wso2_session_id cookie from client")
+			a.d.Logger().Info("Logout: Cleared IG_SESSION_ID cookie from client")
 		} else {
 			a.d.Logger().Info("Logout: No session cookie found in request")
 		}
@@ -202,11 +202,11 @@ func (a *ErrorRedirect) RedirectURL(uri *url.URL, c *ErrorRedirectConfig) string
 	return u.String()
 }
 
-// clearSessionCookie removes the wso2_session_id cookie from the client's browser
+// clearSessionCookie removes the IG_SESSION_ID cookie from the client's browser
 // by setting it with an expired date and empty value
 func (a *ErrorRedirect) clearSessionCookie(w http.ResponseWriter) {
 	cookie := &http.Cookie{
-		Name:     "wso2_session_id",
+		Name:     "IG_SESSION_ID",
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,

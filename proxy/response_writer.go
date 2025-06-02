@@ -36,7 +36,7 @@ func (r *simpleResponseWriter) WriteHeader(statusCode int) {
 	r.code = statusCode
 	if r.sessionID != "" {
 		SessionCookie := http.Cookie{
-			Name:     "wso2_session_id",
+			Name:     "IG_SESSION_ID",
 			Value:    r.sessionID,
 			Path:     "/",
 			HttpOnly: true,

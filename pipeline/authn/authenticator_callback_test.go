@@ -194,8 +194,8 @@ func TestAuthenticatorCallback(t *testing.T) {
 						assert.Equal(t, tc.expectSess.Extra["sub"], sess.Extra["sub"])
 						assert.Equal(t, tc.expectSess.Extra["username"], sess.Extra["username"])
 						assert.Equal(t, tc.expectSess.Extra["name"], sess.Extra["name"])
-						assert.NotEmpty(t, sess.Extra["wso2_session_id"])
-						assert.NotEmpty(t, sess.Header.Get("wso2_session_id"))
+						assert.NotEmpty(t, sess.Extra["IG_SESSION_ID"])
+						assert.NotEmpty(t, sess.Header.Get("IG_SESSION_ID"))
 					}
 				}
 			})

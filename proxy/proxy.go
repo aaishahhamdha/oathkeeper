@@ -49,15 +49,15 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	sess, _ := r.Context().Value(ContextKeySession).(*authn.AuthenticationSession)
 	d.r.Logger().WithField("context", r.Context()).Debug("Request context information")
 	d.r.Logger().WithField("session", sess).Debug("Session information")
-	WSO2SessionID := ""
+	IGSessionID := ""
 	if sess != nil {
 		d.r.Logger().WithField("session_extra", sess.Extra).Debug("Session extra data")
 		d.r.Logger().WithField("session_header", sess.Header).Debug("Session header data")
-		WSO2SessionID = sess.Header.Get("wso2_session_id")
-		d.r.Logger().WithField("wso2_session_id", WSO2SessionID).Debug("WSO2 session ID from header")
+		IGSessionID = sess.Header.Get("IG_SESSION_ID")
+		d.r.Logger().WithField("IG_SESSION_ID", IGSessionID).Debug("IG session ID from header")
 	}
 
-	rw := NewSimpleResponseWriter(WSO2SessionID)
+	rw := NewSimpleResponseWriter(IGSessionID)
 	fields := map[string]interface{}{
 		"http_method":     r.Method,
 		"http_url":        r.URL.String(),

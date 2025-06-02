@@ -61,7 +61,7 @@ func TestAuthenticatorSessionJWT(t *testing.T) {
 				r: func() *http.Request {
 					req := &http.Request{Header: http.Header{}}
 					cookie := &http.Cookie{
-						Name:  "wso2_session_id",
+						Name:  "IG_SESSION_ID",
 						Value: "nonexistent_session",
 					}
 					req.AddCookie(cookie)
@@ -75,7 +75,7 @@ func TestAuthenticatorSessionJWT(t *testing.T) {
 				r: func() *http.Request {
 					req := &http.Request{Header: http.Header{}}
 					cookie := &http.Cookie{
-						Name:  "wso2_session_id",
+						Name:  "IG_SESSION_ID",
 						Value: "invalid_jwt_session",
 					}
 					req.AddCookie(cookie)
@@ -105,7 +105,7 @@ func TestAuthenticatorSessionJWT(t *testing.T) {
 				r: func() *http.Request {
 					req := &http.Request{Header: http.Header{}}
 					cookie := &http.Cookie{
-						Name:  "wso2_session_id",
+						Name:  "IG_SESSION_ID",
 						Value: "expired_session_456",
 					}
 					req.AddCookie(cookie)
@@ -135,7 +135,7 @@ func TestAuthenticatorSessionJWT(t *testing.T) {
 				r: func() *http.Request {
 					req := &http.Request{Header: http.Header{}}
 					cookie := &http.Cookie{
-						Name:  "wso2_session_id",
+						Name:  "IG_SESSION_ID",
 						Value: "aud_session_789",
 					}
 					req.AddCookie(cookie)
@@ -165,7 +165,7 @@ func TestAuthenticatorSessionJWT(t *testing.T) {
 				r: func() *http.Request {
 					req := &http.Request{Header: http.Header{}}
 					cookie := &http.Cookie{
-						Name:  "wso2_session_id",
+						Name:  "IG_SESSION_ID",
 						Value: "bad_aud_session_101",
 					}
 					req.AddCookie(cookie)
@@ -215,10 +215,10 @@ func TestAuthenticatorSessionJWT(t *testing.T) {
 					assert.Equal(t, tc.expectSess.Subject, session.Subject)
 					assert.Equal(t, tc.expectSess.Extra["sub"], session.Extra["sub"])
 					assert.Equal(t, tc.expectSess.Extra["username"], session.Extra["username"])
-					assert.Equal(t, tc.expectSess.Extra["wso2_session_id"], session.Extra["wso2_session_id"])
+					assert.Equal(t, tc.expectSess.Extra["IG_SESSION_ID"], session.Extra["IG_SESSION_ID"])
 					assert.Equal(t, tc.expectSess.Extra["id_token"], session.Extra["id_token"])
 					assert.NotEmpty(t, session.Extra["access_token"]) // Check that access_token exists
-					assert.NotEmpty(t, session.Header.Get("wso2_session_id"))
+					assert.NotEmpty(t, session.Header.Get("IG_SESSION_ID"))
 					assert.NotEmpty(t, session.Header.Get("sub"))
 					assert.NotEmpty(t, session.Header.Get("username"))
 				}

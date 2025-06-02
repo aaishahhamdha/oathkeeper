@@ -331,7 +331,7 @@ func TestErrorRedirectEdgeCases(t *testing.T) {
 				setupReq: func(r *http.Request) {
 					// Add session cookie but no session in store
 					cookie := &http.Cookie{
-						Name:  "wso2_session_id",
+						Name:  "IG_SESSION_ID",
 						Value: "non-existent-session",
 					}
 					r.AddCookie(cookie)
@@ -524,7 +524,7 @@ func TestErrorRedirectLogoutType(t *testing.T) {
 
 					// Add session cookie to request
 					cookie := &http.Cookie{
-						Name:  "wso2_session_id",
+						Name:  "IG_SESSION_ID",
 						Value: sessionID,
 					}
 					r.AddCookie(cookie)
@@ -548,17 +548,17 @@ func TestErrorRedirectLogoutType(t *testing.T) {
 					_, exists := session_store.GlobalStore.GetSession("test-session-123")
 					assert.False(t, exists)
 
-					// Verify that the wso2_session_id cookie is cleared
+					// Verify that the IG_SESSION_ID cookie is cleared
 					cookies := rw.Header().Values("Set-Cookie")
 					var foundClearCookie bool
 					for _, cookieStr := range cookies {
-						if strings.Contains(cookieStr, "wso2_session_id=") &&
+						if strings.Contains(cookieStr, "IG_SESSION_ID=") &&
 							(strings.Contains(cookieStr, "Max-Age=0") || strings.Contains(cookieStr, "Max-Age=-1")) {
 							foundClearCookie = true
 							break
 						}
 					}
-					assert.True(t, foundClearCookie, "Should set a cookie to clear wso2_session_id")
+					assert.True(t, foundClearCookie, "Should set a cookie to clear IG_SESSION_ID")
 				},
 			},
 		} {

@@ -356,8 +356,8 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	session_store.GlobalStore.AddSession(sess)
 	a.logger.WithField("session_id", id).Info("Generated and stored session")
 	a.logger.Debug("Setting session ID into authentication session")
-	session.SetHeader("wso2_session_id", id)
-	session.Extra["wso2_session_id"] = id
+	session.SetHeader("IG_SESSION_ID", id)
+	session.Extra["IG_SESSION_ID"] = id
 	return nil
 
 }
