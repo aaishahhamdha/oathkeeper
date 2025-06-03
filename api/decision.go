@@ -109,7 +109,6 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 		WithField("granted", true).
 		Info("Access request granted")
 
-	// Copy headers from the authentication session to the response
 	for k := range s.Header {
 		// Avoid copying the original Content-Length header from the client
 		if strings.ToLower(k) == "content-length" {
@@ -117,43 +116,5 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set(k, s.Header.Get(k))
-	}
-
-	// Copy cookies from the authentication session to the response
-	copyCookies(w, s.Header)
-	sessionID := s.Header.Get("IG_SESSION_ID")
-	h.r.Logger().WithField("IG_SESSION_ID", sessionID).Debug("Session ID from header in decision")
-	h.r.Logger().WithField("extra_info", s.Extra).Debug("Session extra information")
-	// If there's session data in Extra that needs to be sent to the client
-	if s.Extra != nil {
-		// Check for cookie information that needs to be set
-		if cookieInfo, ok := s.Extra["set_cookie"].(map[string]interface{}); ok {
-			h.r.Logger().WithField("cookie_info", cookieInfo).Debug("Setting cookie from session extra data")
-			cookie := &http.Cookie{
-				Name:     cookieInfo["name"].(string),
-				Value:    cookieInfo["value"].(string),
-				Path:     cookieInfo["path"].(string),
-				HttpOnly: cookieInfo["httpOnly"].(bool),
-				Secure:   cookieInfo["secure"].(bool),
-			}
-			if maxAge, ok := cookieInfo["maxAge"].(int); ok {
-				cookie.MaxAge = maxAge
-			}
-			http.SetCookie(w, cookie)
-		}
-	}
-
-	w.WriteHeader(http.StatusOK)
-}
-
-// copyCookies extracts cookies from the header and sets them in the response
-func copyCookies(w http.ResponseWriter, header http.Header) {
-	if cookies := header.Get("Set-Cookie"); cookies != "" {
-		// Multiple cookies might be separated in the header
-		for _, cookieStr := range header.Values("Set-Cookie") {
-			if cookieStr != "" {
-				w.Header().Add("Set-Cookie", cookieStr)
-			}
-		}
 	}
 }
