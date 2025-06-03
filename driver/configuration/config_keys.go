@@ -90,3 +90,10 @@ const (
 	ErrorsRedirectIsEnabled        Key = ErrorsHandlers + ".redirect.enabled"
 	ErrorsWWWAuthenticateIsEnabled Key = ErrorsHandlers + ".www_authenticate.enabled"
 )
+
+// Session store
+const (
+	SessionStoreKey      Key = "session_store"
+	SessionStoreTypeKey  Key = "session_store.type"
+	SessionStoreRedisKey Key = "session_store.redis"
+)

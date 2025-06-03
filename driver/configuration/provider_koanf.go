@@ -455,13 +455,6 @@ func (v *KoanfProvider) TLSConfig(daemon string) *TLSConfig {
 	return c
 }
 
-// Constants for session store configuration keys
-const (
-	SessionStoreKey      = "session_store"
-	SessionStoreTypeKey  = "session_store.type"
-	SessionStoreRedisKey = "session_store.redis"
-)
-
 // SessionStoreIsEnabled returns true if a session store is configured
 func (v *KoanfProvider) SessionStoreIsEnabled() bool {
 	return v.source.Exists(SessionStoreKey)
