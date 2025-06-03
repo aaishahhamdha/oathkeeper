@@ -77,6 +77,9 @@ const (
 
 	// logout
 	AuthenticatorLogoutIsEnabled Key = "authenticators.logout.enabled"
+
+	// session jwt
+	AuthenticatorSessionJWTIsEnabled Key = "authenticators.session_jwt.enabled"
 )
 
 // Errors
