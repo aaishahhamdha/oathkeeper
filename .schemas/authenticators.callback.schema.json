@@ -1,0 +1,76 @@
+{
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.callback.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Callback Authenticator Configuration",
+  "description": "This section is optional when the authenticator is disabled.",
+  "required": ["token_url"],
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "title": "OAuth 2.0 Client ID",
+      "description": "The OAuth 2.0 client ID to use for authentication.",
+      "examples": ["my-client-id"]
+    },
+    "client_secret": {
+      "type": "string",
+      "title": "OAuth 2.0 Client Secret",
+      "description": "The OAuth 2.0 client secret to use for authentication.",
+      "examples": ["my-client-secret"]
+    },
+    "token_url": {
+      "type": "string",
+      "format": "uri",
+      "title": "OAuth 2.0 Token URL",
+      "description": "The OAuth 2.0 token endpoint URL.\n\n>If this authenticator is enabled, this value is required.",
+      "examples": ["https://oauth2-provider.com/oauth2/token"]
+    },
+    "userinfo_url": {
+      "type": "string",
+      "format": "uri",
+      "title": "OAuth 2.0 UserInfo URL",
+      "description": "The OAuth 2.0 userinfo endpoint URL.",
+      "examples": ["https://oauth2-provider.com/oauth2/userinfo"]
+    },
+    "redirect_url": {
+      "type": "string",
+      "format": "uri",
+      "title": "OAuth 2.0 Redirect URL",
+      "description": "The OAuth 2.0 redirect URL.",
+      "examples": ["https://my-app.com/callback"]
+    },
+    "token_endpoint_auth_method": {
+      "type": "string",
+      "title": "Token Endpoint Authentication Method",
+      "description": "The authentication method to use when calling the token endpoint.",
+      "enum": ["client_secret_basic", "client_secret_post"],
+      "default": "client_secret_basic",
+      "examples": ["client_secret_basic", "client_secret_post"]
+    },
+    "retry": {
+      "type": "object",
+      "title": "Retry Configuration",
+      "description": "Configuration for retrying failed requests.",
+      "properties": {
+        "max_delay": {
+          "type": "string",
+          "title": "Maximum Delay",
+          "description": "The maximum delay between retries.",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+          "default": "1s",
+          "examples": ["1s", "500ms", "2s"]
+        },
+        "give_up_after": {
+          "type": "string",
+          "title": "Give Up After",
+          "description": "The maximum time to spend retrying.",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+          "default": "2s",
+          "examples": ["2s", "5s", "10s"]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

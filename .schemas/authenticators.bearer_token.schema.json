@@ -1,0 +1,101 @@
+{
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.bearer_token.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Bearer Token Authenticator Configuration",
+  "description": "This section is optional when the authenticator is disabled.",
+  "required": ["check_session_url"],
+  "properties": {
+    "check_session_url": {
+      "title": "Token Check URL",
+      "type": "string",
+      "format": "uri",
+      "description": "The origin to proxy requests to. If the response is a 200 with body `{ \"subject\": \"...\", \"extra\": {} }`. The request will pass the subject through successfully, otherwise it will be marked as unauthorized.\n\n>If this authenticator is enabled, this value is required.",
+      "examples": ["https://session-store-host"]
+    },
+    "token_from": {
+      "title": "Token Location",
+      "description": "The location to look for the bearer token. If not configured, the token will be received from a default location - 'Authorization' header.\n\nOne and only one location (header, query, or cookie) must be specified.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "header": {
+          "type": "string",
+          "description": "The header (case insensitive) that contains the token. Default is 'Authorization'.",
+          "examples": ["Authorization"]
+        },
+        "query_parameter": {
+          "type": "string",
+          "description": "The query parameter (case sensitive) that contains the token. For example 'access_token'."
+        },
+        "cookie": {
+          "type": "string",
+          "description": "The cookie (case sensitive) that contains the token. For example 'access_token'."
+        }
+      }
+    },
+    "prefix": {
+      "type": "string",
+      "title": "Token Prefix",
+      "description": "A prefix that the token must have. If the token does not have this prefix, the authenticator will not be responsible for the request.",
+      "examples": ["Bearer "]
+    },
+    "preserve_query": {
+      "type": "boolean",
+      "title": "Preserve Query Parameters",
+      "description": "If set to true, the query parameters of the original request will be preserved when making the request to the session store.",
+      "default": false
+    },
+    "preserve_path": {
+      "type": "boolean", 
+      "title": "Preserve Path",
+      "description": "If set to true, the path of the original request will be preserved when making the request to the session store.",
+      "default": false
+    },
+    "preserve_host": {
+      "type": "boolean",
+      "title": "Preserve Host",
+      "description": "If set to true, the host of the original request will be preserved when making the request to the session store.",
+      "default": false
+    },
+    "extra_from": {
+      "type": "string",
+      "title": "Extra From",
+      "description": "An optional JSON pointer to the field that contains extra information. If not specified, the whole response will be used as extra information.",
+      "default": "extra",
+      "examples": ["extra", "session.extra"]
+    },
+    "subject_from": {
+      "type": "string", 
+      "title": "Subject From",
+      "description": "An optional JSON pointer to the field that contains the subject. If not specified, the 'sub' field will be used.",
+      "default": "sub",
+      "examples": ["sub", "user.id", "username"]
+    },
+    "forward_http_headers": {
+      "type": "array",
+      "title": "Forward HTTP Headers",
+      "description": "A list of headers to forward to the session store. If not specified, no headers will be forwarded.",
+      "items": {
+        "type": "string"
+      },
+      "examples": [["Authorization", "X-User-ID"]]
+    },
+    "additional_headers": {
+      "type": "object",
+      "title": "Additional Headers",
+      "description": "Additional headers to add to the request to the session store.",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "examples": [{"X-Custom-Header": "custom-value"}]
+    },
+    "force_method": {
+      "type": "string",
+      "title": "Force Method",
+      "description": "Force a specific HTTP method when making the request to the session store.",
+      "examples": ["GET", "POST"]
+    }
+  },
+  "additionalProperties": false
+}
