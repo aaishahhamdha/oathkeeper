@@ -38,14 +38,13 @@ const (
 
 // Mutators
 const (
-	MutatorCookieIsEnabled    Key = "mutators.cookie.enabled"
-	MutatorSetCookieIsEnabled Key = "mutators.set_cookie.enabled"
-	MutatorHeaderIsEnabled    Key = "mutators.header.enabled"
-	MutatorNoopIsEnabled      Key = "mutators.noop.enabled"
-	MutatorHydratorIsEnabled  Key = "mutators.hydrator.enabled"
-	MutatorIDTokenIsEnabled   Key = "mutators.id_token.enabled"
-	MutatorIDTokenJWKSURL     Key = "mutators.id_token.config.jwks_url"
-	MutatorIDTokenIssuerURL   Key = "mutators.id_token.config.issuer_url"
+	MutatorCookieIsEnabled   Key = "mutators.cookie.enabled"
+	MutatorHeaderIsEnabled   Key = "mutators.header.enabled"
+	MutatorNoopIsEnabled     Key = "mutators.noop.enabled"
+	MutatorHydratorIsEnabled Key = "mutators.hydrator.enabled"
+	MutatorIDTokenIsEnabled  Key = "mutators.id_token.enabled"
+	MutatorIDTokenJWKSURL    Key = "mutators.id_token.config.jwks_url"
+	MutatorIDTokenIssuerURL  Key = "mutators.id_token.config.issuer_url"
 )
 
 // Authenticators

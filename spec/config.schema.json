@@ -2089,17 +2089,6 @@
             }
           ]
         },
-"set-cookie": {
-  "title": "HTTP Set Cookie",
-  "description": "Sets a hardcoded session cookie.",
-  "type": "object",
-  "properties": {
-    "enabled": {
-      "$ref": "#/definitions/handlerSwitch"
-    }
-  },
-  "additionalProperties": false
-},
         "header": {
           "title": "HTTP Header",
           "description": "The [`header` mutator](https://www.ory.sh/oathkeeper/docs/pipeline/mutator#header).",
