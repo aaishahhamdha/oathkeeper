@@ -2,7 +2,6 @@ package session_store
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -40,15 +39,6 @@ func InitializeSessionStore(config StoreConfig) (SessionStorer, error) {
 	default:
 		return nil, fmt.Errorf("unsupported session store type: %s", config.Type)
 	}
-}
-
-func InitializeFromJSON(configJSON []byte) (SessionStorer, error) {
-	var config StoreConfig
-	if err := json.Unmarshal(configJSON, &config); err != nil {
-		return nil, fmt.Errorf("failed to parse session store config: %w", err)
-	}
-
-	return InitializeSessionStore(config)
 }
 
 type redisStoreAdapter struct {

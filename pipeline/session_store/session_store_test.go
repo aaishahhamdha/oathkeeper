@@ -14,7 +14,7 @@ func TestGenerateSessionID(t *testing.T) {
 		id1, err := GenerateSessionID()
 		require.NoError(t, err)
 		assert.NotEmpty(t, id1)
-		assert.Len(t, id1, 32) // 16 bytes = 32 hex characters
+		assert.Len(t, id1, 32)
 
 		id2, err := GenerateSessionID()
 		require.NoError(t, err)
@@ -29,7 +29,6 @@ func TestGenerateSessionID(t *testing.T) {
 		id, err := GenerateSessionID()
 		require.NoError(t, err)
 
-		// Should be valid hex
 		for _, char := range id {
 			assert.True(t, (char >= '0' && char <= '9') || (char >= 'a' && char <= 'f'))
 		}
@@ -54,7 +53,6 @@ func TestInMemoryStore(t *testing.T) {
 	t.Run("method=AddSession", func(t *testing.T) {
 		store.AddSession(session)
 
-		// Verify session was added
 		retrieved, exists := store.GetSession("test-session-123")
 		assert.True(t, exists)
 		assert.Equal(t, session, retrieved)

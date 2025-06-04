@@ -110,64 +110,6 @@ func TestInitializeSessionStore(t *testing.T) {
 	})
 }
 
-func TestInitializeFromJSON(t *testing.T) {
-	t.Run("should parse valid JSON config", func(t *testing.T) {
-		configJSON := []byte(`{
-			"type": "memory"
-		}`)
-
-		store, err := InitializeFromJSON(configJSON)
-		require.NoError(t, err)
-		assert.NotNil(t, store)
-	})
-
-	t.Run("should parse redis config from JSON", func(t *testing.T) {
-		configJSON := []byte(`{
-			"type": "redis",
-			"redis": {
-				"addr": "localhost:6379",
-				"password": "",
-				"db": 0,
-				"session_prefix": "test:session:",
-				"state_prefix": "test:state:",
-				"ttl": "1h"
-			}
-		}`)
-
-		store, err := InitializeFromJSON(configJSON)
-		if err != nil {
-			// Redis not available, that's expected in CI/testing
-			t.Skip("Redis not available for testing")
-			return
-		}
-
-		assert.NotNil(t, store)
-	})
-
-	t.Run("should fail with invalid JSON", func(t *testing.T) {
-		configJSON := []byte(`{
-			"type": "memory",
-			"invalid": json
-		}`)
-
-		store, err := InitializeFromJSON(configJSON)
-		assert.Error(t, err)
-		assert.Nil(t, store)
-		assert.Contains(t, err.Error(), "failed to parse session store config")
-	})
-
-	t.Run("should fail with invalid store type in JSON", func(t *testing.T) {
-		configJSON := []byte(`{
-			"type": "invalid_type"
-		}`)
-
-		store, err := InitializeFromJSON(configJSON)
-		assert.Error(t, err)
-		assert.Nil(t, store)
-		assert.Contains(t, err.Error(), "unsupported session store type")
-	})
-}
-
 func TestRedisStoreAdapterInterface(t *testing.T) {
 	t.Run("should implement SessionStorer interface", func(t *testing.T) {
 		// Create a mock RedisStore for testing
