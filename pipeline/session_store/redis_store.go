@@ -10,7 +10,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// RedisStore implements the SessionStorer interface with Redis
 type RedisStore struct {
 	client        *redis.Client
 	sessionPrefix string
@@ -33,7 +32,6 @@ func (r *RedisStore) CleanExpiredStates(maxAge time.Duration) {
 }
 
 func (r *RedisStore) GetSessionCount() int {
-	// Use KEYS command with the session prefix pattern to count sessions
 	keys, err := r.client.Keys(r.ctx, r.sessionPrefix+"*").Result()
 	if err != nil {
 		return 0
@@ -53,7 +51,7 @@ func (r *RedisStore) ValidateAndRemoveState(ctx context.Context, state string) (
 	key := r.statePrefix + state
 	data, err := r.client.GetDel(ctx, key).Result()
 	if err == redis.Nil {
-		return "", nil // Not found, not necessarily an error
+		return "", nil
 	}
 	if err != nil {
 		return "", fmt.Errorf("redis error: %w", err)
@@ -61,7 +59,6 @@ func (r *RedisStore) ValidateAndRemoveState(ctx context.Context, state string) (
 	return data, nil
 }
 
-// Configuration for Redis connection
 type RedisConfig struct {
 	Addr          string        `json:"addr"`
 	Password      string        `json:"password"`
@@ -72,7 +69,6 @@ type RedisConfig struct {
 	ParsedTTL     time.Duration `json:"-"`
 }
 
-// NewRedisStore creates a new Redis-backed session store
 func NewRedisStore(config RedisConfig) (*RedisStore, error) {
 	fmt.Printf("SESSION_STORE: Creating Redis store with addr: %s, DB: %d\n", config.Addr, config.DB)
 
@@ -82,7 +78,6 @@ func NewRedisStore(config RedisConfig) (*RedisStore, error) {
 		DB:       config.DB,
 	})
 
-	// Test connection
 	ctx := context.Background()
 	fmt.Printf("SESSION_STORE: Testing Redis connection...\n")
 	if err := client.Ping(ctx).Err(); err != nil {
@@ -102,7 +97,6 @@ func NewRedisStore(config RedisConfig) (*RedisStore, error) {
 		statePrefix = config.StatePrefix
 	}
 
-	// Default TTL if not set
 	if config.ParsedTTL == 0 {
 		config.ParsedTTL = 24 * time.Hour
 	}
@@ -133,7 +127,6 @@ func (r *RedisStore) AddSession(ctx context.Context, sess Session) error {
 	return nil
 }
 
-// GetSession retrieves a session by its ID
 func (r *RedisStore) GetSession(id string) (Session, bool) {
 	var sess Session
 	data, err := r.client.Get(r.ctx, r.sessionPrefix+id).Bytes()
@@ -148,12 +141,10 @@ func (r *RedisStore) GetSession(id string) (Session, bool) {
 	return sess, true
 }
 
-// DeleteSession removes a session from Redis
 func (r *RedisStore) DeleteSession(id string) {
 	r.client.Del(r.ctx, r.sessionPrefix+id)
 }
 
-// GetField retrieves a specific field from a session
 func (r *RedisStore) GetField(id string, field string) (string, bool) {
 	sess, ok := r.GetSession(id)
 	if !ok {
@@ -174,7 +165,6 @@ func (r *RedisStore) GetField(id string, field string) (string, bool) {
 	}
 }
 
-// AddStateEntry stores a state entry for CSRF protection
 func (r *RedisStore) AddStateEntry(state string, ip, userAgent string) {
 	stateEntry := StateEntry{
 		State:     state,

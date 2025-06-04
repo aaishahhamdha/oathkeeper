@@ -7,7 +7,6 @@ import (
 	"time"
 )
 
-// Session represents the session information for a user
 type Session struct {
 	ID          string
 	Username    string
@@ -18,7 +17,6 @@ type Session struct {
 	IDToken     string
 }
 
-// StateEntry represents a temporary state for CSRF protection
 type StateEntry struct {
 	State     string
 	CreatedAt time.Time
@@ -26,7 +24,7 @@ type StateEntry struct {
 	UserAgent string
 }
 
-// SessionStorer defines the interface for session storage implementations
+// Interface for session storage implementations
 type SessionStorer interface {
 	AddSession(sess Session)
 	GetSession(id string) (Session, bool)
@@ -36,20 +34,17 @@ type SessionStorer interface {
 	GetSessionCount() int
 	SessionExists(id string) bool
 
-	// State management methods
 	AddStateEntry(state string, ip, userAgent string)
 	ValidateAndRemoveState(state string) bool
 	CleanExpiredStates(maxAge time.Duration)
 }
 
-// Store implements the SessionStorer interface with in-memory storage
 type Store struct {
 	mu           sync.RWMutex
-	sessions     map[string]Session    // map of session ID to session
-	stateEntries map[string]StateEntry // map of state to state entry
+	sessions     map[string]Session
+	stateEntries map[string]StateEntry
 }
 
-// NewStore initializes and returns a new session store
 func NewStore() *Store {
 	return &Store{
 		sessions:     make(map[string]Session),
@@ -57,10 +52,10 @@ func NewStore() *Store {
 	}
 }
 
-// GlobalStore is the singleton instance of the session store
+// Singleton instance of the session store
 var GlobalStore SessionStorer
 
-// GenerateSessionID creates a new cryptographically secure random session ID
+// Creates a new cryptographically secure random session ID
 func GenerateSessionID() (string, error) {
 	bytes := make([]byte, 16) // 128-bit session ID
 	_, err := rand.Read(bytes)
@@ -70,14 +65,12 @@ func GenerateSessionID() (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-// AddSession adds a new session to the store
 func (s *Store) AddSession(sess Session) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.sessions[sess.ID] = sess
 }
 
-// GetSession retrieves a session by its ID
 func (s *Store) GetSession(id string) (Session, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -85,14 +78,12 @@ func (s *Store) GetSession(id string) (Session, bool) {
 	return sess, ok
 }
 
-// DeleteSession removes a session from the store
 func (s *Store) DeleteSession(id string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	delete(s.sessions, id)
 }
 
-// CleanExpired removes all expired sessions
 func (s *Store) CleanExpired() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -104,8 +95,6 @@ func (s *Store) CleanExpired() {
 	}
 }
 
-// GetField retrieves a specific string field from the session by ID.
-// Supported fields: "username", "sub", "access_token", "id_token", "state"
 func (s *Store) GetField(id string, field string) (string, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -129,7 +118,6 @@ func (s *Store) GetField(id string, field string) (string, bool) {
 	}
 }
 
-// AddStateEntry stores a state entry for CSRF protection
 func (s *Store) AddStateEntry(state string, ip, userAgent string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -141,8 +129,6 @@ func (s *Store) AddStateEntry(state string, ip, userAgent string) {
 	}
 }
 
-// ValidateAndRemoveState checks if a state exists and removes it if found
-// Returns true if state was found and removed, false otherwise
 func (s *Store) ValidateAndRemoveState(state string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -155,7 +141,6 @@ func (s *Store) ValidateAndRemoveState(state string) bool {
 	return false
 }
 
-// CleanExpiredStates removes all expired state entries
 func (s *Store) CleanExpiredStates(maxAge time.Duration) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -167,14 +152,12 @@ func (s *Store) CleanExpiredStates(maxAge time.Duration) {
 	}
 }
 
-// GetSessionCount returns the total number of active sessions
 func (s *Store) GetSessionCount() int {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return len(s.sessions)
 }
 
-// SessionExists checks if a session exists without retrieving it
 func (s *Store) SessionExists(id string) bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -182,7 +165,6 @@ func (s *Store) SessionExists(id string) bool {
 	return exists
 }
 
-// InitGlobalStore initializes the global session store with the provided configuration
 func InitGlobalStore(config StoreConfig) error {
 	store, err := InitializeSessionStore(config)
 	if err != nil {
@@ -193,7 +175,6 @@ func InitGlobalStore(config StoreConfig) error {
 	return nil
 }
 
-// DefaultConfig returns the default configuration for the session store
 func DefaultConfig() StoreConfig {
 	return StoreConfig{
 		Type: InMemoryStore,

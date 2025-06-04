@@ -7,7 +7,6 @@ import (
 	"time"
 )
 
-// StoreType defines the type of session store to use
 type StoreType string
 
 const (
@@ -15,19 +14,16 @@ const (
 	RedisStoreType StoreType = "redis"
 )
 
-// StoreConfig holds configuration for the session store
 type StoreConfig struct {
 	Type  StoreType   `json:"type"`
 	Redis RedisConfig `json:"redis,omitempty"`
 }
 
-// InitializeSessionStore creates and returns a SessionStorer based on the provided configuration
 func InitializeSessionStore(config StoreConfig) (SessionStorer, error) {
 	fmt.Printf("SESSION_STORE: Initializing session store with type: %s\n", config.Type)
 
 	switch config.Type {
 	case InMemoryStore, "":
-		// Default to in-memory store if not specified
 		fmt.Printf("SESSION_STORE: Using in-memory session store\n")
 		return NewStore(), nil
 
@@ -46,7 +42,6 @@ func InitializeSessionStore(config StoreConfig) (SessionStorer, error) {
 	}
 }
 
-// InitializeFromJSON creates a session store from JSON configuration
 func InitializeFromJSON(configJSON []byte) (SessionStorer, error) {
 	var config StoreConfig
 	if err := json.Unmarshal(configJSON, &config); err != nil {

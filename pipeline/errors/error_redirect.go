@@ -70,9 +70,7 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 		}
 		// Store the state in the session store with client info
 		session_store.GlobalStore.AddStateEntry(state, r.RemoteAddr, r.UserAgent())
-		// Add state to the redirect URL
 		redirectURL := a.RedirectURL(r.URL, c) + "&state=" + state
-		// Perform the redirect
 		http.Redirect(w, r, redirectURL, c.Code)
 		a.d.Logger().WithFields(map[string]interface{}{
 			"redirect_url": redirectURL,
@@ -94,14 +92,12 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 		if err == nil && sessionCookie != nil {
 			a.d.Logger().WithField("session_id", sessionCookie.Value).Debug("Logout: Found session cookie")
 
-			// Check if session exists before deletion
 			if _, exists := session_store.GlobalStore.GetSession(sessionCookie.Value); exists {
 				a.d.Logger().Debug("Session exists in store, proceeding with logout")
 			} else {
 				a.d.Logger().WithField("session_id", sessionCookie.Value).Warn("Logout: Session not found in store")
 			}
 
-			// Get ID token for OIDC logout BEFORE deleting the session
 			idTokenHint, _ = session_store.GlobalStore.GetField(sessionCookie.Value, "id_token")
 			if idTokenHint != "" {
 				a.d.Logger().Debug("Logout: ID token hint found for OIDC logout")
@@ -109,11 +105,9 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 				a.d.Logger().WithField("session_id", sessionCookie.Value).Debug("Logout: No ID token found for session")
 			}
 
-			// Now remove session from session store
 			session_store.GlobalStore.DeleteSession(sessionCookie.Value)
 			a.d.Logger().WithField("session_id", sessionCookie.Value).Info("Logout: Successfully deleted session from store")
 
-			// Verify session was deleted
 			deletedSession, exists := session_store.GlobalStore.GetSession(sessionCookie.Value)
 			a.d.Logger().WithFields(map[string]interface{}{
 				"session_exists": exists,
@@ -121,7 +115,7 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 			}).Debug("Logout verification: Session deletion status")
 			session_store.GlobalStore.CleanExpired()
 
-			// Remove the IG_SESSION_ID cookie from the client's browser
+			// Remove the IG_SESSION_ID cookie
 			a.clearSessionCookie(w)
 			a.d.Logger().Info("Logout: Cleared IG_SESSION_ID cookie from client")
 		} else {
@@ -133,7 +127,7 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 			return errors.WithStack(err)
 		}
 
-		// Construct logout URL with proper URL encoding
+		// Construct logout URL
 		logoutURL, err := url.Parse(c.OidcLogoutUrl)
 		if err != nil {
 			return errors.WithStack(err)
@@ -203,7 +197,6 @@ func (a *ErrorRedirect) RedirectURL(uri *url.URL, c *ErrorRedirectConfig) string
 }
 
 // clearSessionCookie removes the IG_SESSION_ID cookie from the client's browser
-// by setting it with an expired date and empty value
 func (a *ErrorRedirect) clearSessionCookie(w http.ResponseWriter) {
 	cookie := &http.Cookie{
 		Name:     "IG_SESSION_ID",
