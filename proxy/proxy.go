@@ -92,22 +92,18 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 				WithField("granted", false).
 				WithFields(fields).
 				Warn("Access request denied because roundtrip failed")
-			// don't need to return because covered in next line
 		} else {
 			d.r.Logger().
 				WithField("granted", true).
 				WithFields(fields).
 				Info("Access request granted")
 
-			// Call WriteHeader on simpleResponseWriter to trigger session logging and cookie setting
-			// Use the status code from the actual response, or default to 200 if not available
 			statusCode := http.StatusOK
 			if res != nil {
 				statusCode = res.StatusCode
 			}
 			rw.WriteHeader(statusCode)
 
-			// Merge session cookies from simpleResponseWriter into the actual response
 			if res != nil && len(rw.header) > 0 {
 				for key, values := range rw.header {
 					for _, value := range values {
