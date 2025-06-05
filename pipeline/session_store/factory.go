@@ -73,8 +73,8 @@ func (a *redisStoreAdapter) SessionExists(id string) bool {
 	return a.store.SessionExists(id)
 }
 
-func (a *redisStoreAdapter) AddStateEntry(state string, ip, userAgent, upstreamURL string) {
-	a.store.AddStateEntry(state, ip, userAgent, upstreamURL)
+func (a *redisStoreAdapter) AddStateEntry(state string, ip, userAgent, requestURL string, upstreamURL string) {
+	a.store.AddStateEntry(state, ip, userAgent, requestURL, upstreamURL)
 }
 
 func (a *redisStoreAdapter) ValidateAndRemoveState(state string, currentIP, currentUserAgent string) (StateEntry, bool) {
@@ -82,7 +82,6 @@ func (a *redisStoreAdapter) ValidateAndRemoveState(state string, currentIP, curr
 	if err != nil {
 		return StateEntry{}, false
 	}
-	// Check if we got a valid entry (non-empty state means it existed and validation passed)
 	return entry, entry.State != ""
 }
 

@@ -188,12 +188,13 @@ func (r *RedisStore) GetField(id string, field string) (string, bool) {
 	}
 }
 
-func (r *RedisStore) AddStateEntry(state string, ip, userAgent, upstreamURL string) {
+func (r *RedisStore) AddStateEntry(state string, ip, userAgent, requestURL string, upstreamURL string) {
 	stateEntry := StateEntry{
 		State:       state,
 		CreatedAt:   time.Now(),
 		IP:          ip,
 		UserAgent:   userAgent,
+		RequestURL:  requestURL,
 		UpstreamURL: upstreamURL,
 	}
 

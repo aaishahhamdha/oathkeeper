@@ -69,8 +69,11 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 			return err
 		}
 		// Store the state in the session store with client info
-		upStreamURL := rule.GetUpstreamURL()
-		session_store.GlobalStore.AddStateEntry(state, r.RemoteAddr, r.UserAgent(), upStreamURL)
+		var upStreamURL string
+		if rule != nil {
+			upStreamURL = rule.GetUpstreamURL()
+		}
+		session_store.GlobalStore.AddStateEntry(state, r.RemoteAddr, r.UserAgent(), r.URL.String(), upStreamURL)
 		redirectURL := a.RedirectURL(r.URL, c) + "&state=" + state
 		http.Redirect(w, r, redirectURL, c.Code)
 		a.d.Logger().WithFields(map[string]interface{}{

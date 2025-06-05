@@ -172,7 +172,7 @@ func TestInMemoryStore(t *testing.T) {
 
 	t.Run("state_management", func(t *testing.T) {
 		t.Run("method=AddStateEntry", func(t *testing.T) {
-			store.AddStateEntry("state-123", "192.168.1.1", "Mozilla/5.0", "http://localhost/callback")
+			store.AddStateEntry("state-123", "192.168.1.1", "Mozilla/5.0", "http://localhost/request", "http://localhost/callback")
 
 			// State should be valid immediately after adding with correct IP and User Agent
 			entry, valid := store.ValidateAndRemoveState("state-123", "192.168.1.1", "Mozilla/5.0")
@@ -180,6 +180,7 @@ func TestInMemoryStore(t *testing.T) {
 			assert.Equal(t, "state-123", entry.State)
 			assert.Equal(t, "192.168.1.1", entry.IP)
 			assert.Equal(t, "Mozilla/5.0", entry.UserAgent)
+			assert.Equal(t, "http://localhost/request", entry.RequestURL)
 			assert.Equal(t, "http://localhost/callback", entry.UpstreamURL)
 
 			// Should not be valid after removal
@@ -189,7 +190,7 @@ func TestInMemoryStore(t *testing.T) {
 
 		t.Run("method=ValidateAndRemoveState_with_security_validation", func(t *testing.T) {
 			// Add state
-			store.AddStateEntry("state-security-test", "192.168.1.5", "Edge/90.0", "http://localhost/api")
+			store.AddStateEntry("state-security-test", "192.168.1.5", "Edge/90.0", "http://localhost/request", "http://localhost/api")
 
 			// Should fail with wrong IP
 			_, valid := store.ValidateAndRemoveState("state-security-test", "192.168.1.6", "Edge/90.0")
@@ -205,6 +206,7 @@ func TestInMemoryStore(t *testing.T) {
 			assert.Equal(t, "state-security-test", entry.State)
 			assert.Equal(t, "192.168.1.5", entry.IP)
 			assert.Equal(t, "Edge/90.0", entry.UserAgent)
+			assert.Equal(t, "http://localhost/request", entry.RequestURL)
 			assert.Equal(t, "http://localhost/api", entry.UpstreamURL)
 
 			// State should be removed after successful validation
@@ -214,7 +216,7 @@ func TestInMemoryStore(t *testing.T) {
 
 		t.Run("method=ValidateAndRemoveState", func(t *testing.T) {
 			// Add state
-			store.AddStateEntry("state-456", "192.168.1.2", "Chrome/90.0", "http://localhost/callback")
+			store.AddStateEntry("state-456", "192.168.1.2", "Chrome/90.0", "http://localhost/request", "http://localhost/callback")
 
 			// First validation should succeed and remove
 			entry, valid := store.ValidateAndRemoveState("state-456", "192.168.1.2", "Chrome/90.0")
@@ -222,6 +224,7 @@ func TestInMemoryStore(t *testing.T) {
 			assert.Equal(t, "state-456", entry.State)
 			assert.Equal(t, "192.168.1.2", entry.IP)
 			assert.Equal(t, "Chrome/90.0", entry.UserAgent)
+			assert.Equal(t, "http://localhost/request", entry.RequestURL)
 			assert.Equal(t, "http://localhost/callback", entry.UpstreamURL)
 
 			// Second validation should fail (already removed)
@@ -235,8 +238,8 @@ func TestInMemoryStore(t *testing.T) {
 
 		t.Run("method=CleanExpiredStates", func(t *testing.T) {
 			// Add some states
-			store.AddStateEntry("recent-state", "192.168.1.3", "Safari/14.0", "http://localhost/callback")
-			store.AddStateEntry("old-state", "192.168.1.4", "Firefox/88.0", "http://localhost/callback")
+			store.AddStateEntry("recent-state", "192.168.1.3", "Safari/14.0", "http://localhost/request", "http://localhost/callback")
+			store.AddStateEntry("old-state", "192.168.1.4", "Firefox/88.0", "http://localhost/request", "http://localhost/callback")
 
 			// Manually set an old timestamp for one state (this is a limitation of the current implementation)
 			// In a real scenario, you'd wait or use a mock time
