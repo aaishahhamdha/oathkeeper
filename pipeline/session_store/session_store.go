@@ -20,7 +20,6 @@ type Session struct {
 type StateEntry struct {
 	State       string
 	CreatedAt   time.Time
-	IP          string
 	UserAgent   string
 	RequestURL  string
 	UpstreamURL string
@@ -36,8 +35,8 @@ type SessionStorer interface {
 	GetSessionCount() int
 	SessionExists(id string) bool
 
-	AddStateEntry(state string, ip, userAgent, requestURL string, upstreamURL string)
-	ValidateAndRemoveState(state string, currentIP, currentUserAgent string) (StateEntry, bool)
+	AddStateEntry(state string, userAgent, requestURL string, upstreamURL string)
+	ValidateAndRemoveState(state string, currentUserAgent string) (StateEntry, bool)
 	CleanExpiredStates(maxAge time.Duration)
 }
 
@@ -120,29 +119,24 @@ func (s *Store) GetField(id string, field string) (string, bool) {
 	}
 }
 
-func (s *Store) AddStateEntry(state string, ip, userAgent, requestURL string, upstreamURL string) {
+func (s *Store) AddStateEntry(state string, userAgent, requestURL string, upstreamURL string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.stateEntries[state] = StateEntry{
 		State:       state,
 		CreatedAt:   time.Now(),
-		IP:          ip,
 		UserAgent:   userAgent,
 		RequestURL:  requestURL,
 		UpstreamURL: upstreamURL,
 	}
 }
 
-func (s *Store) ValidateAndRemoveState(state string, currentIP, currentUserAgent string) (StateEntry, bool) {
+func (s *Store) ValidateAndRemoveState(state string, currentUserAgent string) (StateEntry, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	entry, exists := s.stateEntries[state]
 	if !exists {
-		return StateEntry{}, false
-	}
-
-	if entry.IP != currentIP {
 		return StateEntry{}, false
 	}
 

@@ -206,9 +206,9 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 		return errors.New("state parameter missing from callback request")
 	}
 
-	stateEntry, valid := session_store.GlobalStore.ValidateAndRemoveState(state, r.RemoteAddr, r.UserAgent())
+	stateEntry, valid := session_store.GlobalStore.ValidateAndRemoveState(state, r.UserAgent())
 	if !valid {
-		return errors.New("invalid state: possible CSRF attack, session expiry, or security validation failure (IP/User-Agent mismatch)")
+		return errors.New("invalid state: possible CSRF attack, session expiry, or security validation failure (User-Agent mismatch)")
 	}
 
 	a.logger.Debug("State validated successfully. Proceeding with authorization code")

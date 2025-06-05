@@ -73,7 +73,7 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 		if rule != nil {
 			upStreamURL = rule.GetUpstreamURL()
 		}
-		session_store.GlobalStore.AddStateEntry(state, r.RemoteAddr, r.UserAgent(), r.URL.String(), upStreamURL)
+		session_store.GlobalStore.AddStateEntry(state, r.UserAgent(), r.URL.String(), upStreamURL)
 		redirectURL := a.RedirectURL(r.URL, c) + "&state=" + state
 		http.Redirect(w, r, redirectURL, c.Code)
 		a.d.Logger().WithFields(map[string]interface{}{

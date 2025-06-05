@@ -70,7 +70,7 @@ func TestAuthenticatorCallback(t *testing.T) {
 				}`),
 				expectErr: false,
 				setup: func(t *testing.T, router *httprouter.Router) {
-					session_store.GlobalStore.AddStateEntry("valid_state", "127.0.0.1", "test-agent", "http://localhost/request", "http://localhost/callback")
+					session_store.GlobalStore.AddStateEntry("valid_state", "test-agent", "http://localhost/request", "http://localhost/callback")
 
 					router.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 						err := r.ParseForm()
@@ -141,7 +141,7 @@ func TestAuthenticatorCallback(t *testing.T) {
 				}`),
 				expectErr: false,
 				setup: func(t *testing.T, router *httprouter.Router) {
-					session_store.GlobalStore.AddStateEntry("valid_state_basic", "127.0.0.1", "test-agent", "http://localhost/request", "http://localhost/callback")
+					session_store.GlobalStore.AddStateEntry("valid_state_basic", "test-agent", "http://localhost/request", "http://localhost/callback")
 
 					router.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 						username, password, ok := r.BasicAuth()

@@ -73,12 +73,12 @@ func (a *redisStoreAdapter) SessionExists(id string) bool {
 	return a.store.SessionExists(id)
 }
 
-func (a *redisStoreAdapter) AddStateEntry(state string, ip, userAgent, requestURL string, upstreamURL string) {
-	a.store.AddStateEntry(state, ip, userAgent, requestURL, upstreamURL)
+func (a *redisStoreAdapter) AddStateEntry(state string, userAgent, requestURL string, upstreamURL string) {
+	a.store.AddStateEntry(state, userAgent, requestURL, upstreamURL)
 }
 
-func (a *redisStoreAdapter) ValidateAndRemoveState(state string, currentIP, currentUserAgent string) (StateEntry, bool) {
-	entry, err := a.store.ValidateAndRemoveState(context.Background(), state, currentIP, currentUserAgent)
+func (a *redisStoreAdapter) ValidateAndRemoveState(state string, currentUserAgent string) (StateEntry, bool) {
+	entry, err := a.store.ValidateAndRemoveState(context.Background(), state, currentUserAgent)
 	if err != nil {
 		return StateEntry{}, false
 	}

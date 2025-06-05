@@ -47,7 +47,7 @@ func (r *RedisStore) SessionExists(id string) bool {
 	return exists == 1
 }
 
-func (r *RedisStore) ValidateAndRemoveState(ctx context.Context, state string, currentIP, currentUserAgent string) (StateEntry, error) {
+func (r *RedisStore) ValidateAndRemoveState(ctx context.Context, state string, currentUserAgent string) (StateEntry, error) {
 	key := r.statePrefix + state
 	data, err := r.client.Get(ctx, key).Result()
 	if err == redis.Nil {
@@ -62,12 +62,7 @@ func (r *RedisStore) ValidateAndRemoveState(ctx context.Context, state string, c
 		return StateEntry{}, fmt.Errorf("unmarshal error: %w", err)
 	}
 
-	// Validate IP and User Agent for security
-	if stateEntry.IP != currentIP {
-		// Don't remove the state entry on IP mismatch for security logging
-		return StateEntry{}, fmt.Errorf("IP mismatch: expected %s, got %s", stateEntry.IP, currentIP)
-	}
-
+	// Validate User Agent for security
 	if stateEntry.UserAgent != currentUserAgent {
 		// Don't remove the state entry on User Agent mismatch for security logging
 		return StateEntry{}, fmt.Errorf("User Agent mismatch: expected %s, got %s", stateEntry.UserAgent, currentUserAgent)
@@ -188,11 +183,10 @@ func (r *RedisStore) GetField(id string, field string) (string, bool) {
 	}
 }
 
-func (r *RedisStore) AddStateEntry(state string, ip, userAgent, requestURL string, upstreamURL string) {
+func (r *RedisStore) AddStateEntry(state string, userAgent, requestURL string, upstreamURL string) {
 	stateEntry := StateEntry{
 		State:       state,
 		CreatedAt:   time.Now(),
-		IP:          ip,
 		UserAgent:   userAgent,
 		RequestURL:  requestURL,
 		UpstreamURL: upstreamURL,
