@@ -47,16 +47,39 @@ func (r *RedisStore) SessionExists(id string) bool {
 	return exists == 1
 }
 
-func (r *RedisStore) ValidateAndRemoveState(ctx context.Context, state string) (string, error) {
+func (r *RedisStore) ValidateAndRemoveState(ctx context.Context, state string, currentIP, currentUserAgent string) (StateEntry, error) {
 	key := r.statePrefix + state
-	data, err := r.client.GetDel(ctx, key).Result()
+	data, err := r.client.Get(ctx, key).Result()
 	if err == redis.Nil {
-		return "", nil
+		return StateEntry{}, nil
 	}
 	if err != nil {
-		return "", fmt.Errorf("redis error: %w", err)
+		return StateEntry{}, fmt.Errorf("redis error: %w", err)
 	}
-	return data, nil
+
+	var stateEntry StateEntry
+	if err := json.Unmarshal([]byte(data), &stateEntry); err != nil {
+		return StateEntry{}, fmt.Errorf("unmarshal error: %w", err)
+	}
+
+	// Validate IP and User Agent for security
+	if stateEntry.IP != currentIP {
+		// Don't remove the state entry on IP mismatch for security logging
+		return StateEntry{}, fmt.Errorf("IP mismatch: expected %s, got %s", stateEntry.IP, currentIP)
+	}
+
+	if stateEntry.UserAgent != currentUserAgent {
+		// Don't remove the state entry on User Agent mismatch for security logging
+		return StateEntry{}, fmt.Errorf("User Agent mismatch: expected %s, got %s", stateEntry.UserAgent, currentUserAgent)
+	}
+
+	// All validations passed, remove the state entry
+	_, err = r.client.Del(ctx, key).Result()
+	if err != nil {
+		return StateEntry{}, fmt.Errorf("redis delete error: %w", err)
+	}
+
+	return stateEntry, nil
 }
 
 type RedisConfig struct {
@@ -165,12 +188,13 @@ func (r *RedisStore) GetField(id string, field string) (string, bool) {
 	}
 }
 
-func (r *RedisStore) AddStateEntry(state string, ip, userAgent string) {
+func (r *RedisStore) AddStateEntry(state string, ip, userAgent, upstreamURL string) {
 	stateEntry := StateEntry{
-		State:     state,
-		CreatedAt: time.Now(),
-		IP:        ip,
-		UserAgent: userAgent,
+		State:       state,
+		CreatedAt:   time.Now(),
+		IP:          ip,
+		UserAgent:   userAgent,
+		UpstreamURL: upstreamURL,
 	}
 
 	data, err := json.Marshal(stateEntry)

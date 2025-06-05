@@ -73,13 +73,17 @@ func (a *redisStoreAdapter) SessionExists(id string) bool {
 	return a.store.SessionExists(id)
 }
 
-func (a *redisStoreAdapter) AddStateEntry(state string, ip, userAgent string) {
-	a.store.AddStateEntry(state, ip, userAgent)
+func (a *redisStoreAdapter) AddStateEntry(state string, ip, userAgent, upstreamURL string) {
+	a.store.AddStateEntry(state, ip, userAgent, upstreamURL)
 }
 
-func (a *redisStoreAdapter) ValidateAndRemoveState(state string) bool {
-	data, _ := a.store.ValidateAndRemoveState(context.Background(), state)
-	return data != ""
+func (a *redisStoreAdapter) ValidateAndRemoveState(state string, currentIP, currentUserAgent string) (StateEntry, bool) {
+	entry, err := a.store.ValidateAndRemoveState(context.Background(), state, currentIP, currentUserAgent)
+	if err != nil {
+		return StateEntry{}, false
+	}
+	// Check if we got a valid entry (non-empty state means it existed and validation passed)
+	return entry, entry.State != ""
 }
 
 func (a *redisStoreAdapter) CleanExpiredStates(maxAge time.Duration) {

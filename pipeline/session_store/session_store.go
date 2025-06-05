@@ -18,10 +18,11 @@ type Session struct {
 }
 
 type StateEntry struct {
-	State     string
-	CreatedAt time.Time
-	IP        string
-	UserAgent string
+	State       string
+	CreatedAt   time.Time
+	IP          string
+	UserAgent   string
+	UpstreamURL string
 }
 
 // Interface for session storage implementations
@@ -34,8 +35,8 @@ type SessionStorer interface {
 	GetSessionCount() int
 	SessionExists(id string) bool
 
-	AddStateEntry(state string, ip, userAgent string)
-	ValidateAndRemoveState(state string) bool
+	AddStateEntry(state string, ip, userAgent, upstreamURL string)
+	ValidateAndRemoveState(state string, currentIP, currentUserAgent string) (StateEntry, bool)
 	CleanExpiredStates(maxAge time.Duration)
 }
 
@@ -118,27 +119,37 @@ func (s *Store) GetField(id string, field string) (string, bool) {
 	}
 }
 
-func (s *Store) AddStateEntry(state string, ip, userAgent string) {
+func (s *Store) AddStateEntry(state string, ip, userAgent, upstreamURL string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.stateEntries[state] = StateEntry{
-		State:     state,
-		CreatedAt: time.Now(),
-		IP:        ip,
-		UserAgent: userAgent,
+		State:       state,
+		CreatedAt:   time.Now(),
+		IP:          ip,
+		UserAgent:   userAgent,
+		UpstreamURL: upstreamURL,
 	}
 }
 
-func (s *Store) ValidateAndRemoveState(state string) bool {
+func (s *Store) ValidateAndRemoveState(state string, currentIP, currentUserAgent string) (StateEntry, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	_, exists := s.stateEntries[state]
-	if exists {
-		delete(s.stateEntries, state)
-		return true
+	entry, exists := s.stateEntries[state]
+	if !exists {
+		return StateEntry{}, false
 	}
-	return false
+
+	if entry.IP != currentIP {
+		return StateEntry{}, false
+	}
+
+	if entry.UserAgent != currentUserAgent {
+		return StateEntry{}, false
+	}
+
+	delete(s.stateEntries, state)
+	return entry, true
 }
 
 func (s *Store) CleanExpiredStates(maxAge time.Duration) {
