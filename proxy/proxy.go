@@ -198,11 +198,20 @@ func EnrichRequestedURL(r *httputil.ProxyRequest) {
 }
 
 func ConfigureBackendURL(r *http.Request, rl *rule.Rule) error {
-	if rl.Upstream.URL == "" {
+	var upstreamURL string
+	if rl.Upstream.URL != "" {
+		upstreamURL = rl.Upstream.URL
+	} else if sess, ok := r.Context().Value(ContextKeySession).(*authn.AuthenticationSession); ok && sess != nil {
+		if dynamicURL, exists := sess.Extra["upstream_url"].(string); exists && dynamicURL != "" {
+			upstreamURL = dynamicURL
+		}
+	}
+
+	if upstreamURL == "" {
 		return errors.Errorf("Unable to forward the request because matched rule does not define an upstream URL")
 	}
 
-	p, err := url.Parse(rl.Upstream.URL)
+	p, err := url.Parse(upstreamURL)
 	if err != nil {
 		return errors.WithStack(err)
 	}

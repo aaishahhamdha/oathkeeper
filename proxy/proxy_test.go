@@ -21,6 +21,7 @@ import (
 
 	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
 	"github.com/aaishahhamdha/oathkeeper/internal"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
 	"github.com/aaishahhamdha/oathkeeper/proxy"
 	"github.com/aaishahhamdha/oathkeeper/rule"
 	"github.com/aaishahhamdha/oathkeeper/x"
@@ -506,6 +507,61 @@ func TestConfigureBackendURL(t *testing.T) {
 			require.NoError(t, proxy.ConfigureBackendURL(tc.r, tc.rl))
 			assert.EqualValues(t, tc.eURL, tc.r.URL.String())
 			assert.EqualValues(t, tc.eHost, tc.r.Host)
+		})
+	}
+}
+
+func TestConfigureBackendURLWithDynamicUpstream(t *testing.T) {
+	for k, tc := range []struct {
+		name         string
+		r            *http.Request
+		rl           *rule.Rule
+		dynamicURL   string
+		expectedURL  string
+		expectedHost string
+	}{
+		{
+			name:         "should use dynamic upstream URL from session when rule has no upstream URL",
+			r:            &http.Request{Host: "localhost", URL: &url.URL{Path: "/api/users/1234", Scheme: "http"}},
+			rl:           &rule.Rule{Upstream: rule.Upstream{URL: ""}},
+			dynamicURL:   "http://dynamic.example.com/",
+			expectedURL:  "http://dynamic.example.com/api/users/1234",
+			expectedHost: "dynamic.example.com",
+		},
+		{
+			name:         "should use rule upstream URL when both rule and dynamic URL exist",
+			r:            &http.Request{Host: "localhost", URL: &url.URL{Path: "/api/users/1234", Scheme: "http"}},
+			rl:           &rule.Rule{Upstream: rule.Upstream{URL: "http://rule.example.com/"}},
+			dynamicURL:   "http://dynamic.example.com/",
+			expectedURL:  "http://rule.example.com/api/users/1234",
+			expectedHost: "rule.example.com",
+		},
+		{
+			name:         "should use dynamic upstream URL with preserve host",
+			r:            &http.Request{Host: "localhost:3000", URL: &url.URL{Path: "/api/users/1234", Scheme: "http"}},
+			rl:           &rule.Rule{Upstream: rule.Upstream{URL: "", PreserveHost: true}},
+			dynamicURL:   "http://dynamic.example.com:4000/",
+			expectedURL:  "http://dynamic.example.com:4000/api/users/1234",
+			expectedHost: "localhost:3000",
+		},
+	} {
+		t.Run(fmt.Sprintf("case=%d/name=%s", k, tc.name), func(t *testing.T) {
+			// Create a session with dynamic upstream URL
+			session := &authn.AuthenticationSession{
+				Subject: "test-user",
+				Extra:   map[string]interface{}{},
+			}
+			if tc.dynamicURL != "" {
+				session.Extra["upstream_url"] = tc.dynamicURL
+			}
+
+			// Add session to request context
+			ctx := context.WithValue(tc.r.Context(), proxy.ContextKeySession, session)
+			tc.r = tc.r.WithContext(ctx)
+
+			require.NoError(t, proxy.ConfigureBackendURL(tc.r, tc.rl))
+			assert.EqualValues(t, tc.expectedURL, tc.r.URL.String())
+			assert.EqualValues(t, tc.expectedHost, tc.r.Host)
 		})
 	}
 }
