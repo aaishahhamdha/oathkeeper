@@ -202,6 +202,13 @@ func (r *Rule) GetID() string {
 	return r.ID
 }
 
+func (r *Rule) GetUpstreamURL() string {
+	if r == nil {
+		return ""
+	}
+	return r.Upstream.URL
+}
+
 // IsMatching checks whether the provided url and method match the rule.
 // An error will be returned if a regexp matching strategy is selected and regexp timeout occurs.
 func (r *Rule) IsMatching(strategy configuration.MatchingStrategy, method string, u *url.URL, protocol Protocol) (bool, error) {
