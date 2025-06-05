@@ -57,7 +57,11 @@ func TestAuthenticatorCallback(t *testing.T) {
 			},
 			{
 				d: "should pass with valid authorization code and state",
-				r: &http.Request{URL: &url.URL{RawQuery: "code=valid_code&state=valid_state"}},
+				r: &http.Request{
+					URL:        &url.URL{RawQuery: "code=valid_code&state=valid_state"},
+					RemoteAddr: "127.0.0.1",
+					Header:     http.Header{"User-Agent": []string{"test-agent"}},
+				},
 				config: json.RawMessage(`{
 					"client_id": "test_client",
 					"client_secret": "test_secret",
@@ -66,7 +70,7 @@ func TestAuthenticatorCallback(t *testing.T) {
 				}`),
 				expectErr: false,
 				setup: func(t *testing.T, router *httprouter.Router) {
-					session_store.GlobalStore.AddStateEntry("valid_state", "127.0.0.1", "test-agent")
+					session_store.GlobalStore.AddStateEntry("valid_state", "127.0.0.1", "test-agent", "http://localhost/callback")
 
 					router.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 						err := r.ParseForm()
@@ -124,7 +128,11 @@ func TestAuthenticatorCallback(t *testing.T) {
 			},
 			{
 				d: "should handle client_secret_basic auth method",
-				r: &http.Request{URL: &url.URL{RawQuery: "code=valid_code&state=valid_state_basic"}},
+				r: &http.Request{
+					URL:        &url.URL{RawQuery: "code=valid_code&state=valid_state_basic"},
+					RemoteAddr: "127.0.0.1",
+					Header:     http.Header{"User-Agent": []string{"test-agent"}},
+				},
 				config: json.RawMessage(`{
 					"client_id": "test_client",
 					"client_secret": "test_secret",
@@ -133,7 +141,7 @@ func TestAuthenticatorCallback(t *testing.T) {
 				}`),
 				expectErr: false,
 				setup: func(t *testing.T, router *httprouter.Router) {
-					session_store.GlobalStore.AddStateEntry("valid_state_basic", "127.0.0.1", "test-agent")
+					session_store.GlobalStore.AddStateEntry("valid_state_basic", "127.0.0.1", "test-agent", "http://localhost/callback")
 
 					router.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 						username, password, ok := r.BasicAuth()

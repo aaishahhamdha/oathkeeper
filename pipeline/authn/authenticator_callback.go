@@ -206,12 +206,12 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 		return errors.New("state parameter missing from callback request")
 	}
 
-	if !session_store.GlobalStore.ValidateAndRemoveState(state) {
-		return errors.New("invalid state: possible CSRF attack or session expiry")
+	stateEntry, valid := session_store.GlobalStore.ValidateAndRemoveState(state, r.RemoteAddr, r.UserAgent())
+	if !valid {
+		return errors.New("invalid state: possible CSRF attack, session expiry, or security validation failure (IP/User-Agent mismatch)")
 	}
 
 	a.logger.Debug("State validated successfully. Proceeding with authorization code")
-
 	data := url.Values{}
 	data.Set("grant_type", "authorization_code")
 	data.Set("code", authCode)
@@ -358,6 +358,12 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	a.logger.Debug("Setting session ID into authentication session")
 	session.SetHeader("IG_SESSION_ID", id)
 	session.Extra["IG_SESSION_ID"] = id
+
+	if stateEntry.UpstreamURL != "" {
+		session.Extra["upstream_url"] = stateEntry.UpstreamURL
+		a.logger.WithField("upstream_url", stateEntry.UpstreamURL).Debug("Retrieved upstream URL from state entry")
+	}
+
 	return nil
 
 }
