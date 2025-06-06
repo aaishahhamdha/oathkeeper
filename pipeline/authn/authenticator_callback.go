@@ -364,6 +364,11 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 		a.logger.WithField("upstream_url", stateEntry.UpstreamURL).Debug("Retrieved upstream URL from state entry")
 	}
 
+	if stateEntry.RequestURL != "" {
+		session.Extra["request_url"] = stateEntry.RequestURL
+		a.logger.WithField("request_url", stateEntry.RequestURL).Debug("Retrieved request URL from state entry")
+
+	}
 	return nil
 
 }
