@@ -64,7 +64,7 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 	if c.Type == "auth" {
 		a.d.Logger().Debug("Redirect type: auth")
 		// Generate a random state for CSRF protection
-		state, err := GenerateState(32)
+		state, err := GenerateState(64)
 		if err != nil {
 			return err
 		}
@@ -126,7 +126,7 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 			a.d.Logger().Info("Logout: No session cookie found in request")
 		}
 
-		state, err := GenerateState(32)
+		state, err := GenerateState(64)
 		if err != nil {
 			return errors.WithStack(err)
 		}

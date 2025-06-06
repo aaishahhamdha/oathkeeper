@@ -210,7 +210,8 @@ func TestRedisStoreAdapter(t *testing.T) {
 func TestFactoryIntegration(t *testing.T) {
 	t.Run("should create in-memory store by default", func(t *testing.T) {
 		config := StoreConfig{
-			Type: InMemoryStore,
+			Type:   "memory",
+			Config: map[string]interface{}{},
 		}
 
 		store, err := InitializeSessionStore(config)
@@ -232,9 +233,9 @@ func TestFactoryIntegration(t *testing.T) {
 
 	t.Run("should fail gracefully when Redis is not available", func(t *testing.T) {
 		config := StoreConfig{
-			Type: RedisStoreType,
-			Redis: RedisConfig{
-				Addr: "invalid:99999",
+			Type: "redis",
+			Config: map[string]interface{}{
+				"addr": "invalid:99999",
 			},
 		}
 

@@ -131,24 +131,18 @@ errors:
                 - 127.0.0.0/24
 
 # Session Store Configuration
-# Configure the backend for session storage. Defaults to in-memory if not specified.
+# Configure the backend for session storage using the plugin system.
+# Supports: "memory", "redis", and any custom registered stores.
 session_store:
   # Type of session store: "memory" (default) or "redis"
   type: memory
-
-  # Redis configuration (only used when type is "redis")
+  # Redis configuration (when type is "redis")
   redis:
-    # Redis server address
     addr: "127.0.0.1:6379"
-    # Redis password (optional)
     password: ""
-    # Redis database number (0-15)
     db: 0
-    # Prefix for session keys
     session_prefix: "session:"
-    # Prefix for state keys (CSRF protection)
     state_prefix: "state:"
-    # Time to live for session data
     ttl: "24h"
 
 # All authenticators can be configured under this configuration key

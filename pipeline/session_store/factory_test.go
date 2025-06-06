@@ -12,14 +12,14 @@ import (
 func TestInitializeSessionStore(t *testing.T) {
 	t.Run("should create memory store by default", func(t *testing.T) {
 		config := StoreConfig{
-			Type: "memory",
+			Type:   "memory",
+			Config: map[string]interface{}{},
 		}
 
 		store, err := InitializeSessionStore(config)
 		require.NoError(t, err)
 		assert.NotNil(t, store)
 
-		// Test that it's actually a memory store by using it
 		session := Session{
 			ID:        "test-memory-session",
 			Username:  "memoryuser",
@@ -36,7 +36,8 @@ func TestInitializeSessionStore(t *testing.T) {
 
 	t.Run("should create memory store when type is empty", func(t *testing.T) {
 		config := StoreConfig{
-			Type: "",
+			Type:   "",
+			Config: map[string]interface{}{},
 		}
 
 		store, err := InitializeSessionStore(config)
@@ -50,13 +51,13 @@ func TestInitializeSessionStore(t *testing.T) {
 	t.Run("should create redis store with valid config", func(t *testing.T) {
 		config := StoreConfig{
 			Type: "redis",
-			Redis: RedisConfig{
-				Addr:          "localhost:6379",
-				Password:      "",
-				DB:            0,
-				SessionPrefix: "test:session:",
-				StatePrefix:   "test:state:",
-				TTL:           "1h",
+			Config: map[string]interface{}{
+				"addr":           "localhost:6379",
+				"password":       "",
+				"db":             float64(0),
+				"session_prefix": "test:session:",
+				"state_prefix":   "test:state:",
+				"ttl":            "1h",
 			},
 		}
 
@@ -75,7 +76,8 @@ func TestInitializeSessionStore(t *testing.T) {
 
 	t.Run("should fail with invalid store type", func(t *testing.T) {
 		config := StoreConfig{
-			Type: "invalid",
+			Type:   "invalid",
+			Config: map[string]interface{}{},
 		}
 
 		store, err := InitializeSessionStore(config)
@@ -87,13 +89,13 @@ func TestInitializeSessionStore(t *testing.T) {
 	t.Run("should parse TTL correctly for redis config", func(t *testing.T) {
 		config := StoreConfig{
 			Type: "redis",
-			Redis: RedisConfig{
-				Addr:          "localhost:6379",
-				Password:      "",
-				DB:            0,
-				SessionPrefix: "test:session:",
-				StatePrefix:   "test:state:",
-				TTL:           "2h30m",
+			Config: map[string]interface{}{
+				"addr":           "localhost:6379",
+				"password":       "",
+				"db":             float64(0),
+				"session_prefix": "test:session:",
+				"state_prefix":   "test:state:",
+				"ttl":            "2h30m",
 			},
 		}
 
@@ -143,13 +145,13 @@ func TestStoreConfig(t *testing.T) {
 	t.Run("should have correct field tags", func(t *testing.T) {
 		config := StoreConfig{
 			Type: "redis",
-			Redis: RedisConfig{
-				Addr:          "localhost:6379",
-				Password:      "secret",
-				DB:            1,
-				SessionPrefix: "session:",
-				StatePrefix:   "state:",
-				TTL:           "24h",
+			Config: map[string]interface{}{
+				"addr":           "localhost:6379",
+				"password":       "secret",
+				"db":             float64(1),
+				"session_prefix": "session:",
+				"state_prefix":   "state:",
+				"ttl":            "24h",
 			},
 		}
 
@@ -162,11 +164,24 @@ func TestStoreConfig(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, config.Type, unmarshaled.Type)
-		assert.Equal(t, config.Redis.Addr, unmarshaled.Redis.Addr)
-		assert.Equal(t, config.Redis.Password, unmarshaled.Redis.Password)
-		assert.Equal(t, config.Redis.DB, unmarshaled.Redis.DB)
-		assert.Equal(t, config.Redis.SessionPrefix, unmarshaled.Redis.SessionPrefix)
-		assert.Equal(t, config.Redis.StatePrefix, unmarshaled.Redis.StatePrefix)
-		assert.Equal(t, config.Redis.TTL, unmarshaled.Redis.TTL)
+		assert.Equal(t, config.Config["addr"], unmarshaled.Config["addr"])
+		assert.Equal(t, config.Config["password"], unmarshaled.Config["password"])
+		assert.Equal(t, config.Config["db"], unmarshaled.Config["db"])
+		assert.Equal(t, config.Config["session_prefix"], unmarshaled.Config["session_prefix"])
+		assert.Equal(t, config.Config["state_prefix"], unmarshaled.Config["state_prefix"])
+		assert.Equal(t, config.Config["ttl"], unmarshaled.Config["ttl"])
+	})
+
+	t.Run("should support plugin registration", func(t *testing.T) {
+		stores := GetRegisteredStores()
+		assert.Contains(t, stores, "memory")
+		assert.Contains(t, stores, "redis")
+
+		RegisterStore("test", func(config map[string]interface{}) (SessionStorer, error) {
+			return NewStore(), nil
+		})
+
+		stores = GetRegisteredStores()
+		assert.Contains(t, stores, "test")
 	})
 }

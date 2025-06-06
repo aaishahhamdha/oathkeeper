@@ -184,6 +184,6 @@ func InitGlobalStore(config StoreConfig) error {
 
 func DefaultConfig() StoreConfig {
 	return StoreConfig{
-		Type: InMemoryStore,
+		Type: "memory",
 	}
 }

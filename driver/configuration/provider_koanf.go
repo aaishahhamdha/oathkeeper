@@ -467,31 +467,47 @@ func (v *KoanfProvider) SessionStoreConfig() (*session_store.StoreConfig, error)
 	if !v.SessionStoreIsEnabled() {
 		// Return default config if not explicitly configured
 		config := session_store.StoreConfig{
-			Type: session_store.InMemoryStore,
+			Type: "memory",
 		}
 		v.l.Debug("Using default in-memory session store configuration")
 		return &config, nil
 	}
 
-	var config session_store.StoreConfig
+	// Parse the session store configuration according to the schema
+	var rawConfig struct {
+		Type  string                 `json:"type"`
+		Redis map[string]interface{} `json:"redis,omitempty"`
+	}
+
 	v.l.WithField("config_key", SessionStoreKey).Debug("Attempting to unmarshal session store config")
-	if err := v.source.Unmarshal(SessionStoreKey, &config); err != nil {
+	if err := v.source.Unmarshal(SessionStoreKey, &rawConfig); err != nil {
 		v.l.WithError(err).Error("Failed to unmarshal session store config")
 		return nil, errors.WithStack(err)
 	}
 
-	v.l.WithField("store_type", config.Type).Debug("Successfully loaded session store config")
+	v.l.WithField("store_type", rawConfig.Type).Debug("Successfully loaded session store config")
 
-	// If Redis is configured, parse the TTL
-	if config.Type == session_store.RedisStoreType && config.Redis.TTL != "" {
-		v.l.WithField("ttl_string", config.Redis.TTL).Debug("Parsing Redis TTL")
-		ttl, err := time.ParseDuration(config.Redis.TTL)
-		if err != nil {
-			v.l.WithError(err).Error("Failed to parse Redis TTL")
-			return nil, errors.WithStack(err)
+	// Convert to the factory-expected format
+	config := session_store.StoreConfig{
+		Type: rawConfig.Type,
+	}
+
+	// If Redis is configured, convert the redis config to the generic config map
+	if rawConfig.Type == "redis" && rawConfig.Redis != nil {
+		config.Config = rawConfig.Redis
+
+		// Parse TTL if present
+		if ttlStr, ok := rawConfig.Redis["ttl"].(string); ok && ttlStr != "" {
+			v.l.WithField("ttl_string", ttlStr).Debug("Parsing Redis TTL")
+			ttl, err := time.ParseDuration(ttlStr)
+			if err != nil {
+				v.l.WithError(err).Error("Failed to parse Redis TTL")
+				return nil, errors.WithStack(err)
+			}
+			// Store the parsed TTL back in the config map for the factory to use
+			config.Config["parsed_ttl"] = ttl
+			v.l.WithField("parsed_ttl", ttl).Debug("Successfully parsed Redis TTL")
 		}
-		config.Redis.ParsedTTL = ttl
-		v.l.WithField("parsed_ttl", ttl).Debug("Successfully parsed Redis TTL")
 	}
 
 	return &config, nil
