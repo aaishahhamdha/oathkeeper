@@ -75,7 +75,6 @@ func (d *requestHandler) matchesWhen(w http.ResponseWriter, r *http.Request, h p
 
 func (d *requestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl *rule.Rule, handleErr error) {
 	if rl == nil {
-		// Create a new, empty rule.
 		rl = new(rule.Rule)
 	}
 
