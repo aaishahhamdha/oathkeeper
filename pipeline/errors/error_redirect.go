@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -198,6 +199,7 @@ func (a *ErrorRedirect) GetID() string {
 
 func (a *ErrorRedirect) RedirectURL(uri *url.URL, c *ErrorRedirectConfig, session *authn.AuthenticationSession) string {
 	to := c.To
+	fmt.Println("data,", c.To, session)
 	if to == "request_url" && session != nil && session.Extra != nil {
 		if reqURL, ok := session.Extra["request_url"].(string); ok && reqURL != "" {
 			to = reqURL
