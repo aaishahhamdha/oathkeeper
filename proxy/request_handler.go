@@ -171,6 +171,8 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 
 	// initialize the session used during all the flow
 	session = d.InitializeAuthnSession(r, rl)
+	ctx := context.WithValue(r.Context(), ContextKeySession, session)
+	*r = *r.WithContext(ctx)
 
 	if len(rl.Authenticators) == 0 {
 		err = errors.New("No authentication handler was set in the rule")
@@ -315,8 +317,8 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 		}
 	}
 	// Store the fully processed session back in the context for later use
-	ctx := context.WithValue(r.Context(), ContextKeySession, session)
-	*r = *r.WithContext(ctx)
+	// ctx := context.WithValue(r.Context(), ContextKeySession, session)
+	// *r = *r.WithContext(ctx)
 
 	return session, nil
 }
