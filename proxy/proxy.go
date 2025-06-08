@@ -50,14 +50,20 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	d.r.Logger().WithField("context", r.Context()).Debug("Request context information")
 	d.r.Logger().WithField("session", sess).Debug("Session information")
 	IGSessionID := ""
+	InitialRequestURL := ""
 	if sess != nil {
 		d.r.Logger().WithField("session_extra", sess.Extra).Debug("Session extra data")
 		d.r.Logger().WithField("session_header", sess.Header).Debug("Session header data")
 		IGSessionID = sess.Header.Get("IG_SESSION_ID")
+		if reqURL, ok := sess.Extra["request_url"].(string); ok {
+			InitialRequestURL = reqURL
+		}
 		d.r.Logger().WithField("IG_SESSION_ID", IGSessionID).Debug("IG session ID from header")
+		d.r.Logger().WithField("request_url", IGSessionID).Debug("Initial request Url")
+
 	}
 
-	rw := NewSimpleResponseWriter(IGSessionID)
+	rw := NewSimpleResponseWriter(IGSessionID, InitialRequestURL)
 	fields := map[string]interface{}{
 		"http_method":     r.Method,
 		"http_url":        r.URL.String(),

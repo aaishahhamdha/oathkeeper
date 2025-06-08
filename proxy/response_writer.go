@@ -9,18 +9,20 @@ import (
 )
 
 type simpleResponseWriter struct {
-	header    http.Header
-	buffer    *bytes.Buffer
-	code      int
-	sessionID string
+	header            http.Header
+	buffer            *bytes.Buffer
+	code              int
+	sessionID         string
+	initialRequestURL string
 }
 
-func NewSimpleResponseWriter(sessionID string) *simpleResponseWriter {
+func NewSimpleResponseWriter(sessionID string, initialRequestURL string) *simpleResponseWriter {
 	return &simpleResponseWriter{
-		header:    http.Header{},
-		buffer:    bytes.NewBuffer([]byte{}),
-		code:      http.StatusOK,
-		sessionID: sessionID,
+		header:            http.Header{},
+		buffer:            bytes.NewBuffer([]byte{}),
+		code:              http.StatusOK,
+		sessionID:         sessionID,
+		initialRequestURL: initialRequestURL,
 	}
 }
 
@@ -45,5 +47,17 @@ func (r *simpleResponseWriter) WriteHeader(statusCode int) {
 			SameSite: http.SameSiteLaxMode,
 		}
 		r.header.Add("Set-Cookie", SessionCookie.String())
+	}
+	if r.initialRequestURL != "" {
+		RequestURLCookie := http.Cookie{
+			Name:     "request_url",
+			Value:    r.initialRequestURL,
+			Path:     "/",
+			HttpOnly: true,
+			Secure:   true,
+			MaxAge:   3600, // 1 hour in seconds
+			SameSite: http.SameSiteLaxMode,
+		}
+		r.header.Add("Set-Cookie", RequestURLCookie.String())
 	}
 }

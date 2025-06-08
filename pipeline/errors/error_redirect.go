@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -54,6 +53,12 @@ func NewErrorRedirect(
 var ContextKeySession = struct{}{}
 
 func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.AuthenticationSession, config json.RawMessage, rule pipeline.Rule, err error) error {
+	// Safely get the initial request URL from the cookie, if present
+	initialRequestURL := ""
+	if initialRequestURLCookie, cookieErr := r.Cookie("request_url"); cookieErr == nil && initialRequestURLCookie != nil {
+		initialRequestURL = initialRequestURLCookie.Value
+	}
+
 	c, err := a.Config(config)
 	if err != nil {
 		return err
@@ -63,7 +68,8 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.
 	r.URL.Host = x.OrDefaultString(r.Header.Get(xForwardedHost), r.URL.Host)
 	r.URL.Path = x.OrDefaultString(r.Header.Get(xForwardedUri), r.URL.Path)
 
-	if c.Type == "auth" {
+	switch c.Type {
+	case "auth":
 		a.d.Logger().Debug("Redirect type: auth")
 		// Generate a random state for CSRF protection
 		state, err := GenerateState(64)
@@ -87,14 +93,25 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.
 		}(r.URL)
 
 		session_store.GlobalStore.AddStateEntry(state, r.UserAgent(), cleanURL, upStreamURL)
-		redirectURL := a.RedirectURL(r.URL, c, s) + "&state=" + state
+		redirectURL := a.RedirectURL(r.URL, c, initialRequestURL)
+		// Add state as a query param, handling whether ? or & is needed
+		if redirectURL != "" {
+			parsed, err := url.Parse(redirectURL)
+			if err == nil {
+				q := parsed.Query()
+				q.Set("state", state)
+				parsed.RawQuery = q.Encode()
+				redirectURL = parsed.String()
+			} else {
+				redirectURL += "&state=" + state
+			}
+		}
 		http.Redirect(w, r, redirectURL, c.Code)
 		a.d.Logger().WithFields(map[string]interface{}{
 			"redirect_url": redirectURL,
 			"state":        state,
 		}).Info("Redirecting to auth URL with state")
-	} else if c.Type == "logout" {
-
+	case "logout":
 		a.d.Logger().Debug("Redirect type: logout")
 		if c.OidcLogoutUrl == "" {
 			return errors.New("oidc_logout_url is required")
@@ -104,9 +121,8 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.
 		}
 
 		// Get session ID from cookie
-		sessionCookie, err := r.Cookie("IG_SESSION_ID")
 		var idTokenHint string
-		if err == nil && sessionCookie != nil {
+		if sessionCookie, cookieErr := r.Cookie("IG_SESSION_ID"); cookieErr == nil && sessionCookie != nil {
 			a.d.Logger().WithField("session_id", sessionCookie.Value).Debug("Logout: Found session cookie")
 
 			if _, exists := session_store.GlobalStore.GetSession(sessionCookie.Value); exists {
@@ -133,7 +149,7 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.
 			session_store.GlobalStore.CleanExpired()
 
 			// Remove the IG_SESSION_ID cookie
-			a.clearSessionCookie(w)
+			a.clearSessionCookie(w, "IG_SESSION_ID")
 			a.d.Logger().Info("Logout: Cleared IG_SESSION_ID cookie from client")
 		} else {
 			a.d.Logger().Info("Logout: No session cookie found in request")
@@ -152,7 +168,9 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.
 		params := url.Values{}
 		params.Set("post_logout_redirect_uri", c.PostLogoutRedirectUrl)
 		params.Set("state", state)
-		params.Set("id_token_hint", idTokenHint)
+		if idTokenHint != "" {
+			params.Set("id_token_hint", idTokenHint)
+		}
 
 		logoutURL.RawQuery = params.Encode()
 		logoutURLString := logoutURL.String()
@@ -161,10 +179,10 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.
 		http.Redirect(w, r, logoutURLString, c.Code)
 		a.d.Logger().WithField("redirect_url", logoutURLString).Info("Redirecting to logout URL")
 		a.d.Logger().Info("Logout: Successfully completed logout process")
-	} else {
+	default:
 		a.d.Logger().Debug("Redirect type: none")
 		// Type is "none" or any other value - just do a simple redirect
-		redirectURL := a.RedirectURL(r.URL, c, s)
+		redirectURL := a.RedirectURL(r.URL, c, initialRequestURL)
 		http.Redirect(w, r, redirectURL, c.Code)
 		a.d.Logger().WithField("redirect_url", redirectURL).Info("Redirecting to default URL")
 	}
@@ -197,14 +215,11 @@ func (a *ErrorRedirect) GetID() string {
 	return "redirect"
 }
 
-func (a *ErrorRedirect) RedirectURL(uri *url.URL, c *ErrorRedirectConfig, session *authn.AuthenticationSession) string {
+func (a *ErrorRedirect) RedirectURL(uri *url.URL, c *ErrorRedirectConfig, initialRequestURL string) string {
 	to := c.To
-	fmt.Println("data,", c.To, session)
-	if to == "request_url" && session != nil && session.Extra != nil {
-		if reqURL, ok := session.Extra["request_url"].(string); ok && reqURL != "" {
-			to = reqURL
-			return to
-		}
+	if to == "request_url" {
+		to = initialRequestURL
+		return to
 	}
 	if c.ReturnToQueryParam == "" {
 		return to
@@ -220,10 +235,9 @@ func (a *ErrorRedirect) RedirectURL(uri *url.URL, c *ErrorRedirectConfig, sessio
 	return u.String()
 }
 
-// clearSessionCookie removes the IG_SESSION_ID cookie from the client's browser
-func (a *ErrorRedirect) clearSessionCookie(w http.ResponseWriter) {
+func (a *ErrorRedirect) clearSessionCookie(w http.ResponseWriter, name string) {
 	cookie := &http.Cookie{
-		Name:     "IG_SESSION_ID",
+		Name:     name,
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,
