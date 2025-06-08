@@ -25,12 +25,16 @@ const (
 
 type (
 	ErrorRedirectConfig struct {
-		To                    string `json:"to"`
-		Code                  int    `json:"code"`
-		ReturnToQueryParam    string `json:"return_to_query_param"`
-		Type                  string `json:"type"`
-		OidcLogoutUrl         string `json:"oidc_logout_url"`
-		PostLogoutRedirectUrl string `json:"post_logout_redirect_url"`
+		To                    string   `json:"to"`
+		Code                  int      `json:"code"`
+		ReturnToQueryParam    string   `json:"return_to_query_param"`
+		Type                  string   `json:"type"`
+		OidcLogoutUrl         string   `json:"oidc_logout_url"`
+		PostLogoutRedirectUrl string   `json:"post_logout_redirect_url"`
+		OidcAuthorizationUrl  string   `json:"oidc_authorization_url"`
+		ClientID              string   `json:"client_id"`
+		RedirectURL           string   `json:"redirect_url"`
+		Scopes                []string `json:"scopes"`
 	}
 	ErrorRedirect struct {
 		c configuration.Provider
@@ -93,19 +97,23 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.
 		}(r.URL)
 
 		session_store.GlobalStore.AddStateEntry(state, r.UserAgent(), cleanURL, upStreamURL)
-		redirectURL := a.RedirectURL(r.URL, c, initialRequestURL)
-		// Add state as a query param, handling whether ? or & is needed
-		if redirectURL != "" {
-			parsed, err := url.Parse(redirectURL)
-			if err == nil {
-				q := parsed.Query()
-				q.Set("state", state)
-				parsed.RawQuery = q.Encode()
-				redirectURL = parsed.String()
-			} else {
-				redirectURL += "&state=" + state
-			}
+		authURL, err := url.Parse(c.OidcAuthorizationUrl)
+		if err != nil {
+			return errors.WithStack(err)
 		}
+
+		params := url.Values{}
+		params.Set("response_type", "code")
+		params.Set("client_id", c.ClientID)
+		params.Set("redirect_uri", c.RedirectURL)
+		if len(c.Scopes) > 0 {
+			params.Set("scope", url.QueryEscape(joinScopes(c.Scopes)))
+		}
+		params.Set("state", state)
+
+		authURL.RawQuery = params.Encode()
+		redirectURL := authURL.String()
+
 		http.Redirect(w, r, redirectURL, c.Code)
 		a.d.Logger().WithFields(map[string]interface{}{
 			"redirect_url": redirectURL,
@@ -160,7 +168,6 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.
 			return errors.WithStack(err)
 		}
 
-		// Construct logout URL
 		logoutURL, err := url.Parse(c.OidcLogoutUrl)
 		if err != nil {
 			return errors.WithStack(err)
@@ -255,4 +262,15 @@ func GenerateState(length int) (string, error) {
 		return "", err
 	}
 	return base64.URLEncoding.EncodeToString(b), nil
+}
+
+func joinScopes(scopes []string) string {
+	returnString := ""
+	for i, scope := range scopes {
+		if i > 0 {
+			returnString += " "
+		}
+		returnString += scope
+	}
+	return returnString
 }

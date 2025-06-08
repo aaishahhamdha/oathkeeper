@@ -252,6 +252,27 @@
           "pattern": "^[A-Za-z0-9,._~-]*$",
           "default": ""
         },
+        "oidc_authorization_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "OIDC authorization endpoint URL",
+      "examples": ["https://your-oidc-provider.com/oauth2/auth"]
+    },
+    "client_id": {
+      "type": "string",
+      "description": "OIDC client identifier"
+    },
+    "redirect_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "OIDC callback redirect URL"
+    },
+    "scopes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
         "when": {
           "$ref": "#/definitions/configErrorsWhen"
         }
