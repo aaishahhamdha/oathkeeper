@@ -6,7 +6,6 @@ package proxy
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/ory/herodot"
@@ -79,7 +78,6 @@ func (d *requestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl 
 		rl = new(rule.Rule)
 	}
 	sess, _ := r.Context().Value(ContextKeySession).(*authn.AuthenticationSession)
-	fmt.Println("session at error handler", sess)
 	var h pe.Handler
 	var config json.RawMessage
 	for _, re := range rl.Errors {
