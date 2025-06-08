@@ -202,18 +202,17 @@ func (a *ErrorRedirect) RedirectURL(uri *url.URL, c *ErrorRedirectConfig, sessio
 	if c.ReturnToQueryParam == "" {
 		return c.To
 	}
-
-	// Check if c.To contains a template variable like {{key}}
 	to := c.To
-	var key string
 	start := strings.Index(to, "{{")
 	end := strings.Index(to, "}}")
 	if start != -1 && end != -1 && end > start+2 {
-		key = strings.TrimSpace(to[start+2 : end])
-		// Try to get value from session.Extra
+		key := strings.TrimSpace(to[start+2 : end])
 		if session != nil && session.Extra != nil {
 			if val, ok := session.Extra[key]; ok {
-				to = to[:start] + fmt.Sprintf("%v", val) + to[end+2:]
+				if strVal, ok := val.(string); ok {
+					return strVal
+				}
+				return fmt.Sprintf("%v", val)
 			}
 		}
 		return to
