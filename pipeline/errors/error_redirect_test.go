@@ -16,12 +16,21 @@ import (
 	"github.com/ory/herodot"
 
 	"github.com/aaishahhamdha/oathkeeper/internal"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
 	"github.com/aaishahhamdha/oathkeeper/pipeline/session_store"
 )
 
 func TestErrorRedirect(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
+	sess := &authn.AuthenticationSession{
+		Subject: "alice",
+		Extra: map[string]interface{}{
+			"role":        "admin",
+			"request_url": "http://domain:3000/api",
+		},
+		Header: make(http.Header),
+	}
 
 	a, err := reg.PipelineErrorHandler("redirect")
 	require.NoError(t, err)
@@ -166,7 +175,7 @@ func TestErrorRedirect(t *testing.T) {
 			t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 				w := httptest.NewRecorder()
 				r := httptest.NewRequest("GET", "/test", nil)
-				err := a.Handle(w, r, json.RawMessage(tc.config), nil, tc.givenError)
+				err := a.Handle(w, r, sess, json.RawMessage(tc.config), nil, tc.givenError)
 
 				if tc.expectError != nil {
 					require.EqualError(t, err, tc.expectError.Error(), "%+v", err)
@@ -185,6 +194,15 @@ func TestErrorRedirect(t *testing.T) {
 func TestErrorReturnToRedirectURLHeaderUsage(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
+
+	sess := &authn.AuthenticationSession{
+		Subject: "alice",
+		Extra: map[string]interface{}{
+			"role":        "admin",
+			"request_url": "http://domain:3000/api",
+		},
+		Header: make(http.Header),
+	}
 
 	defaultUrl := &url.URL{Scheme: "http", Host: "ory.sh", Path: "/foo"}
 	defaultTransform := func(req *http.Request) {}
@@ -240,7 +258,7 @@ func TestErrorReturnToRedirectURLHeaderUsage(t *testing.T) {
 			r := httptest.NewRequest("GET", defaultUrl.String(), nil)
 			tc.transform(r)
 
-			err = a.Handle(w, r, json.RawMessage(config), nil, nil)
+			err = a.Handle(w, r, sess, json.RawMessage(config), nil, nil)
 			assert.NoError(t, err)
 
 			loc := w.Header().Get("Location")
@@ -264,6 +282,15 @@ func TestErrorReturnToRedirectURLHeaderUsage(t *testing.T) {
 func TestErrorRedirectEdgeCases(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
+
+	sess := &authn.AuthenticationSession{
+		Subject: "alice",
+		Extra: map[string]interface{}{
+			"role":        "admin",
+			"request_url": "http://domain:3000/api",
+		},
+		Header: make(http.Header),
+	}
 
 	a, err := reg.PipelineErrorHandler("redirect")
 	require.NoError(t, err)
@@ -359,7 +386,7 @@ func TestErrorRedirectEdgeCases(t *testing.T) {
 					tc.setupReq(r)
 				}
 
-				err := a.Handle(w, r, json.RawMessage(tc.config), nil, &herodot.ErrUnauthorized)
+				err := a.Handle(w, r, sess, json.RawMessage(tc.config), nil, &herodot.ErrUnauthorized)
 
 				if tc.expectError {
 					require.Error(t, err)
@@ -379,6 +406,15 @@ func TestErrorRedirectEdgeCases(t *testing.T) {
 func TestErrorRedirectURLConstruction(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
+
+	sess := &authn.AuthenticationSession{
+		Subject: "alice",
+		Extra: map[string]interface{}{
+			"role":        "admin",
+			"request_url": "http://domain:3000/api",
+		},
+		Header: make(http.Header),
+	}
 
 	a, err := reg.PipelineErrorHandler("redirect")
 	require.NoError(t, err)
@@ -447,7 +483,7 @@ func TestErrorRedirectURLConstruction(t *testing.T) {
 					tc.setupReq(r)
 				}
 
-				err := a.Handle(w, r, json.RawMessage(tc.config), nil, &herodot.ErrUnauthorized)
+				err := a.Handle(w, r, sess, json.RawMessage(tc.config), nil, &herodot.ErrUnauthorized)
 				require.NoError(t, err)
 
 				if tc.assert != nil {
@@ -462,6 +498,15 @@ func TestErrorRedirectURLConstruction(t *testing.T) {
 func TestErrorRedirectLogoutType(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
+
+	sess := &authn.AuthenticationSession{
+		Subject: "alice",
+		Extra: map[string]interface{}{
+			"role":        "admin",
+			"request_url": "http://domain:3000/api",
+		},
+		Header: make(http.Header),
+	}
 
 	a, err := reg.PipelineErrorHandler("redirect")
 	require.NoError(t, err)
@@ -570,7 +615,7 @@ func TestErrorRedirectLogoutType(t *testing.T) {
 					tc.setupCookie(r)
 				}
 
-				err := a.Handle(w, r, json.RawMessage(tc.config), nil, &herodot.ErrUnauthorized)
+				err := a.Handle(w, r, sess, json.RawMessage(tc.config), nil, &herodot.ErrUnauthorized)
 
 				if tc.expectError {
 					require.Error(t, err)
@@ -590,6 +635,15 @@ func TestErrorRedirectLogoutType(t *testing.T) {
 func TestErrorRedirectAuthType(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
+
+	sess := &authn.AuthenticationSession{
+		Subject: "alice",
+		Extra: map[string]interface{}{
+			"role":        "admin",
+			"request_url": "http://domain:3000/api",
+		},
+		Header: make(http.Header),
+	}
 
 	a, err := reg.PipelineErrorHandler("redirect")
 	require.NoError(t, err)
@@ -649,7 +703,7 @@ func TestErrorRedirectAuthType(t *testing.T) {
 				r.RemoteAddr = "192.168.1.1:12345"
 				r.Header.Set("User-Agent", "TestAgent/1.0")
 
-				err := a.Handle(w, r, json.RawMessage(tc.config), nil, &herodot.ErrUnauthorized)
+				err := a.Handle(w, r, sess, json.RawMessage(tc.config), nil, &herodot.ErrUnauthorized)
 
 				if tc.expectError {
 					require.Error(t, err)
@@ -670,6 +724,15 @@ func TestErrorRedirectStateManagement(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
 
+	sess := &authn.AuthenticationSession{
+		Subject: "alice",
+		Extra: map[string]interface{}{
+			"role":        "admin",
+			"request_url": "http://domain:3000/api",
+		},
+		Header: make(http.Header),
+	}
+
 	a, err := reg.PipelineErrorHandler("redirect")
 	require.NoError(t, err)
 
@@ -688,7 +751,7 @@ func TestErrorRedirectStateManagement(t *testing.T) {
 			r.RemoteAddr = fmt.Sprintf("192.168.1.%d:12345", i+1)
 			r.Header.Set("User-Agent", fmt.Sprintf("TestAgent/%d.0", i+1))
 
-			err := a.Handle(w, r, json.RawMessage(config), nil, &herodot.ErrUnauthorized)
+			err := a.Handle(w, r, sess, json.RawMessage(config), nil, &herodot.ErrUnauthorized)
 			require.NoError(t, err)
 
 			location := w.Header().Get("Location")

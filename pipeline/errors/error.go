@@ -12,11 +12,12 @@ import (
 	"github.com/ory/herodot"
 
 	"github.com/aaishahhamdha/oathkeeper/pipeline"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
 )
 
 type Handler interface {
 	GetID() string
-	Handle(w http.ResponseWriter, r *http.Request, config json.RawMessage, _ pipeline.Rule, err error) error
+	Handle(w http.ResponseWriter, r *http.Request, s *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule, err error) error
 	Validate(config json.RawMessage) error
 }
 

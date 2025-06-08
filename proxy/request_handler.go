@@ -6,6 +6,7 @@ package proxy
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/ory/herodot"
@@ -77,7 +78,8 @@ func (d *requestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl 
 	if rl == nil {
 		rl = new(rule.Rule)
 	}
-
+	sess, _ := r.Context().Value(ContextKeySession).(*authn.AuthenticationSession)
+	fmt.Println("session at error handler", sess)
 	var h pe.Handler
 	var config json.RawMessage
 	for _, re := range rl.Errors {
@@ -148,7 +150,7 @@ func (d *requestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl 
 		return
 	}
 
-	if err := h.Handle(w, r, config, rl, handleErr); err != nil {
+	if err := h.Handle(w, r, sess, config, rl, handleErr); err != nil {
 		d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(
 			`Unable to execute error handler "%s". This is either a bug or a configuration issue and should be reported to the administrator. Returned error: "%s". Original error: "%s"`, h.GetID(), err, handleErr,
 		)))

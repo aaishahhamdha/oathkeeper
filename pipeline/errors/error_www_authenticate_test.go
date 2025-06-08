@@ -16,11 +16,21 @@ import (
 	"github.com/ory/herodot"
 
 	"github.com/aaishahhamdha/oathkeeper/internal"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
 )
 
 func TestErrorWWWAuthenticate(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
+
+	sess := &authn.AuthenticationSession{
+		Subject: "alice",
+		Extra: map[string]interface{}{
+			"role":        "admin",
+			"request_url": "http://domain:3000/api",
+		},
+		Header: make(http.Header),
+	}
 
 	a, err := reg.PipelineErrorHandler("www_authenticate")
 	require.NoError(t, err)
@@ -56,7 +66,7 @@ func TestErrorWWWAuthenticate(t *testing.T) {
 			t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 				w := httptest.NewRecorder()
 				r := httptest.NewRequest("GET", "/test", nil)
-				err := a.Handle(w, r, json.RawMessage(tc.config), nil, tc.givenError)
+				err := a.Handle(w, r, sess, json.RawMessage(tc.config), nil, tc.givenError)
 
 				if tc.expectError != nil {
 					require.EqualError(t, err, tc.expectError.Error(), "%+v", err)

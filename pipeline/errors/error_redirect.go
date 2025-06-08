@@ -9,6 +9,7 @@ import (
 
 	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
 	"github.com/aaishahhamdha/oathkeeper/pipeline"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
 	"github.com/aaishahhamdha/oathkeeper/pipeline/session_store"
 	"github.com/aaishahhamdha/oathkeeper/x"
 	"github.com/pkg/errors"
@@ -51,7 +52,7 @@ func NewErrorRedirect(
 // ContextKeySession is the key used to store the authentication session in the request context
 var ContextKeySession = struct{}{}
 
-func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config json.RawMessage, rule pipeline.Rule, err error) error {
+func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.AuthenticationSession, config json.RawMessage, rule pipeline.Rule, err error) error {
 	c, err := a.Config(config)
 	if err != nil {
 		return err

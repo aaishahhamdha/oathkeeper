@@ -12,6 +12,7 @@ import (
 
 	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
 	"github.com/aaishahhamdha/oathkeeper/pipeline"
+	"github.com/aaishahhamdha/oathkeeper/pipeline/authn"
 	"github.com/aaishahhamdha/oathkeeper/x"
 )
 
@@ -37,7 +38,7 @@ func NewErrorJSON(
 	return &ErrorJSON{c: c, d: d}
 }
 
-func (a *ErrorJSON) Handle(w http.ResponseWriter, r *http.Request, config json.RawMessage, _ pipeline.Rule, handleError error) error {
+func (a *ErrorJSON) Handle(w http.ResponseWriter, r *http.Request, s *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule, handleError error) error {
 	c, err := a.Config(config)
 	if err != nil {
 		return err
