@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -102,17 +103,14 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.
 			return errors.WithStack(err)
 		}
 
-		params := url.Values{}
-		params.Set("response_type", "code")
-		params.Set("client_id", c.ClientID)
-		params.Set("redirect_uri", c.RedirectURL)
-		if len(c.Scopes) > 0 {
-			params.Set("scope", url.QueryEscape(joinScopes(c.Scopes)))
-		}
-		params.Set("state", state)
-
-		authURL.RawQuery = params.Encode()
-		redirectURL := authURL.String()
+		redirectURL := fmt.Sprintf(
+			"%s?response_type=code&client_id=%s&redirect_uri=%s&scope=%s&state=%s",
+			authURL,
+			url.QueryEscape(c.ClientID),
+			url.QueryEscape(c.RedirectURL),
+			url.QueryEscape(joinScopes(c.Scopes)),
+			url.QueryEscape(state),
+		)
 
 		http.Redirect(w, r, redirectURL, c.Code)
 		a.d.Logger().WithFields(map[string]interface{}{
