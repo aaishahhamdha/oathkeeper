@@ -4,8 +4,10 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
 	"github.com/aaishahhamdha/oathkeeper/pipeline"
@@ -86,7 +88,7 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.
 		}(r.URL)
 
 		session_store.GlobalStore.AddStateEntry(state, r.UserAgent(), cleanURL, upStreamURL)
-		redirectURL := a.RedirectURL(r.URL, c) + "&state=" + state
+		redirectURL := a.RedirectURL(r.URL, c, s) + "&state=" + state
 		http.Redirect(w, r, redirectURL, c.Code)
 		a.d.Logger().WithFields(map[string]interface{}{
 			"redirect_url": redirectURL,
@@ -163,7 +165,7 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.
 	} else {
 		a.d.Logger().Debug("Redirect type: none")
 		// Type is "none" or any other value - just do a simple redirect
-		redirectURL := a.RedirectURL(r.URL, c)
+		redirectURL := a.RedirectURL(r.URL, c, s)
 		http.Redirect(w, r, redirectURL, c.Code)
 		a.d.Logger().WithField("redirect_url", redirectURL).Info("Redirecting to default URL")
 	}
@@ -196,14 +198,30 @@ func (a *ErrorRedirect) GetID() string {
 	return "redirect"
 }
 
-func (a *ErrorRedirect) RedirectURL(uri *url.URL, c *ErrorRedirectConfig) string {
+func (a *ErrorRedirect) RedirectURL(uri *url.URL, c *ErrorRedirectConfig, session *authn.AuthenticationSession) string {
 	if c.ReturnToQueryParam == "" {
 		return c.To
 	}
 
-	u, err := url.Parse(c.To)
+	// Check if c.To contains a template variable like {{key}}
+	to := c.To
+	var key string
+	start := strings.Index(to, "{{")
+	end := strings.Index(to, "}}")
+	if start != -1 && end != -1 && end > start+2 {
+		key = strings.TrimSpace(to[start+2 : end])
+		// Try to get value from session.Extra
+		if session != nil && session.Extra != nil {
+			if val, ok := session.Extra[key]; ok {
+				to = to[:start] + fmt.Sprintf("%v", val) + to[end+2:]
+			}
+		}
+		return to
+	}
+
+	u, err := url.Parse(to)
 	if err != nil {
-		return c.To
+		return to
 	}
 
 	q := u.Query()
