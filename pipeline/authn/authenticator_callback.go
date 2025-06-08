@@ -367,8 +367,11 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	if stateEntry.RequestURL != "" {
 		session.Extra["request_url"] = stateEntry.RequestURL
 		a.logger.WithField("request_url", stateEntry.RequestURL).Debug("Retrieved request URL from state entry")
-
+		if val, ok := session.Extra["request_url"]; ok {
+			fmt.Println("request_url from session.Extra:", val)
+		}
 	}
+
 	return nil
 
 }

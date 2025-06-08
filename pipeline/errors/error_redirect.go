@@ -4,10 +4,8 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/aaishahhamdha/oathkeeper/driver/configuration"
 	"github.com/aaishahhamdha/oathkeeper/pipeline"
@@ -199,25 +197,16 @@ func (a *ErrorRedirect) GetID() string {
 }
 
 func (a *ErrorRedirect) RedirectURL(uri *url.URL, c *ErrorRedirectConfig, session *authn.AuthenticationSession) string {
-	if c.ReturnToQueryParam == "" {
-		return c.To
-	}
 	to := c.To
-	start := strings.Index(to, "{{")
-	end := strings.Index(to, "}}")
-	if start != -1 && end != -1 && end > start+2 {
-		key := strings.TrimSpace(to[start+2 : end])
-		if session != nil && session.Extra != nil {
-			if val, ok := session.Extra[key]; ok {
-				if strVal, ok := val.(string); ok {
-					return strVal
-				}
-				return fmt.Sprintf("%v", val)
-			}
+	if to == "request_url" && session != nil && session.Extra != nil {
+		if reqURL, ok := session.Extra["request_url"].(string); ok && reqURL != "" {
+			to = reqURL
+			return to
 		}
+	}
+	if c.ReturnToQueryParam == "" {
 		return to
 	}
-
 	u, err := url.Parse(to)
 	if err != nil {
 		return to
