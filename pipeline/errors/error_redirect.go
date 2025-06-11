@@ -84,11 +84,11 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.
 		}
 		var codeVerifier, codeChallenge string
 		if c.UsePKCE {
-			codeVerifier, err = GenerateState(64)
+			codeVerifier, err = GenerateCodeVerifier()
 			if err != nil {
 				return err
 			}
-			codeChallenge = generateCodeChallenge(codeVerifier)
+			codeChallenge = GenerateCodeChallenge(codeVerifier)
 		}
 		// Store the state in the session store with client info
 		var upStreamURL string
@@ -286,8 +286,17 @@ func joinScopes(scopes []string) string {
 	return returnString
 }
 
-func generateCodeChallenge(codeVerifier string) string {
-	h := sha256.New()
-	h.Write([]byte(codeVerifier))
-	return base64.RawURLEncoding.EncodeToString(h.Sum(nil))
+func GenerateCodeChallenge(verifier string) string {
+	sha256 := sha256.Sum256([]byte(verifier))
+	return base64.RawURLEncoding.EncodeToString(sha256[:])
+}
+
+func GenerateCodeVerifier() (string, error) {
+	randomBytes := make([]byte, 96)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate random bytes: %v", err)
+	}
+
+	return base64.RawURLEncoding.EncodeToString(randomBytes), nil
 }
