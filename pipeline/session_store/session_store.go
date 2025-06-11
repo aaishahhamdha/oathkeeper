@@ -8,21 +8,23 @@ import (
 )
 
 type Session struct {
-	ID          string
-	Username    string
-	Sub         string
-	ExpiresAt   time.Time
-	IssuedAt    time.Time
-	AccessToken string
-	IDToken     string
+	ID           string
+	Username     string
+	Sub          string
+	ExpiresAt    time.Time
+	IssuedAt     time.Time
+	AccessToken  string
+	IDToken      string
+	CodeVerifier string
 }
 
 type StateEntry struct {
-	State       string
-	CreatedAt   time.Time
-	UserAgent   string
-	RequestURL  string
-	UpstreamURL string
+	State        string
+	CreatedAt    time.Time
+	UserAgent    string
+	RequestURL   string
+	UpstreamURL  string
+	CodeVerifier string
 }
 
 // Interface for session storage implementations
@@ -35,7 +37,7 @@ type SessionStorer interface {
 	GetSessionCount() int
 	SessionExists(id string) bool
 
-	AddStateEntry(state string, userAgent, requestURL string, upstreamURL string)
+	AddStateEntry(state string, userAgent, requestURL string, upstreamURL string, codeVerifier string)
 	ValidateAndRemoveState(state string, currentUserAgent string) (StateEntry, bool)
 	CleanExpiredStates(maxAge time.Duration)
 }
@@ -119,15 +121,16 @@ func (s *Store) GetField(id string, field string) (string, bool) {
 	}
 }
 
-func (s *Store) AddStateEntry(state string, userAgent, requestURL string, upstreamURL string) {
+func (s *Store) AddStateEntry(state string, userAgent, requestURL string, upstreamURL string, codeVerifier string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.stateEntries[state] = StateEntry{
-		State:       state,
-		CreatedAt:   time.Now(),
-		UserAgent:   userAgent,
-		RequestURL:  requestURL,
-		UpstreamURL: upstreamURL,
+		State:        state,
+		CreatedAt:    time.Now(),
+		UserAgent:    userAgent,
+		RequestURL:   requestURL,
+		UpstreamURL:  upstreamURL,
+		CodeVerifier: codeVerifier,
 	}
 }
 

@@ -2,6 +2,7 @@ package errors
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -36,6 +37,7 @@ type (
 		ClientID              string   `json:"client_id"`
 		RedirectURL           string   `json:"redirect_url"`
 		Scopes                []string `json:"scopes"`
+		UsePKCE               bool     `json:"use_pkce"`
 	}
 	ErrorRedirect struct {
 		c configuration.Provider
@@ -76,10 +78,17 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.
 	switch c.Type {
 	case "auth":
 		a.d.Logger().Debug("Redirect type: auth")
-		// Generate a random state for CSRF protection
 		state, err := GenerateState(64)
 		if err != nil {
 			return err
+		}
+		var codeVerifier, codeChallenge string
+		if c.UsePKCE {
+			codeVerifier, err = GenerateState(64)
+			if err != nil {
+				return err
+			}
+			codeChallenge = generateCodeChallenge(codeVerifier)
 		}
 		// Store the state in the session store with client info
 		var upStreamURL string
@@ -97,7 +106,7 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.
 			return parsed.String()
 		}(r.URL)
 
-		session_store.GlobalStore.AddStateEntry(state, r.UserAgent(), cleanURL, upStreamURL)
+		session_store.GlobalStore.AddStateEntry(state, r.UserAgent(), cleanURL, upStreamURL, codeVerifier)
 		authURL, err := url.Parse(c.OidcAuthorizationUrl)
 		if err != nil {
 			return errors.WithStack(err)
@@ -111,7 +120,11 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, s *authn.
 			url.QueryEscape(joinScopes(c.Scopes)),
 			url.QueryEscape(state),
 		)
-
+		if c.UsePKCE {
+			redirectURL += fmt.Sprintf("&code_challenge=%s&code_challenge_method=S256",
+				url.QueryEscape(codeChallenge),
+			)
+		}
 		http.Redirect(w, r, redirectURL, c.Code)
 		a.d.Logger().WithFields(map[string]interface{}{
 			"redirect_url": redirectURL,
@@ -271,4 +284,10 @@ func joinScopes(scopes []string) string {
 		returnString += scope
 	}
 	return returnString
+}
+
+func generateCodeChallenge(codeVerifier string) string {
+	h := sha256.New()
+	h.Write([]byte(codeVerifier))
+	return base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 }

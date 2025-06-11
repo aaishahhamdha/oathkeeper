@@ -152,7 +152,7 @@ func (a *AuthenticatorSessionJWT) Authenticate(r *http.Request, session *Authent
 	// Add all session data to Extra
 	session.Extra["sub"] = sess.Sub
 	session.Extra["username"] = sess.Username
-	session.Extra["name"] = sess.Username // Using Username as Name if not available
+	session.Extra["name"] = sess.Username
 	session.Extra["IG_SESSION_ID"] = Cookie.Value
 	session.Extra["id_token"] = sess.IDToken
 	session.Extra["access_token"] = sess.AccessToken

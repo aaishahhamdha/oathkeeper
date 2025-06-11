@@ -216,7 +216,9 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	data.Set("grant_type", "authorization_code")
 	data.Set("code", authCode)
 	data.Set("redirect_uri", cf.RedirectURL)
-
+	if stateEntry.CodeVerifier != "" {
+		data.Set("code_verifier", stateEntry.CodeVerifier)
+	}
 	if cf.TokenEndpointAuthMethod == "client_secret_post" {
 		data.Set("client_id", cf.ClientID)
 		data.Set("client_secret", cf.ClientSecret)
@@ -345,13 +347,14 @@ func (a *AuthenticatorCallback) Authenticate(r *http.Request, session *Authentic
 	}
 
 	sess := session_store.Session{
-		ID:          id,
-		Username:    username,
-		Sub:         userInfoResponse.Sub,
-		IssuedAt:    time.Now(),
-		ExpiresAt:   time.Now().Add(1 * time.Hour),
-		AccessToken: tokenResponse.AccessToken,
-		IDToken:     tokenResponse.IDToken,
+		ID:           id,
+		Username:     username,
+		Sub:          userInfoResponse.Sub,
+		IssuedAt:     time.Now(),
+		ExpiresAt:    time.Now().Add(1 * time.Hour),
+		AccessToken:  tokenResponse.AccessToken,
+		IDToken:      tokenResponse.IDToken,
+		CodeVerifier: stateEntry.CodeVerifier,
 	}
 	session_store.GlobalStore.AddSession(sess)
 	a.logger.WithField("session_id", id).Info("Generated and stored session")

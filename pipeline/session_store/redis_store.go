@@ -183,16 +183,17 @@ func (r *RedisStore) GetField(id string, field string) (string, bool) {
 	}
 }
 
-func (r *RedisStore) AddStateEntry(state string, userAgent, requestURL string, upstreamURL string) {
-	stateEntry := StateEntry{
+func (r *RedisStore) AddStateEntry(state string, userAgent, requestURL string, upstreamURL string, codeVerifier string) {
+	entry := StateEntry{
 		State:       state,
 		CreatedAt:   time.Now(),
 		UserAgent:   userAgent,
 		RequestURL:  requestURL,
 		UpstreamURL: upstreamURL,
+		CodeVerifier: codeVerifier,
 	}
 
-	data, err := json.Marshal(stateEntry)
+	data, err := json.Marshal(entry)
 	if err != nil {
 		return
 	}

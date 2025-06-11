@@ -97,8 +97,8 @@ func (a *redisStoreAdapter) SessionExists(id string) bool {
 	return a.store.SessionExists(id)
 }
 
-func (a *redisStoreAdapter) AddStateEntry(state string, userAgent, requestURL string, upstreamURL string) {
-	a.store.AddStateEntry(state, userAgent, requestURL, upstreamURL)
+func (a *redisStoreAdapter) AddStateEntry(state string, userAgent, requestURL string, upstreamURL string, codeVerifier string) {
+	a.store.AddStateEntry(state, userAgent, requestURL, upstreamURL, codeVerifier)
 }
 
 func (a *redisStoreAdapter) ValidateAndRemoveState(state string, currentUserAgent string) (StateEntry, bool) {

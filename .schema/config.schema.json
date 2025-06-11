@@ -245,6 +245,12 @@
           "enum": [301, 302],
           "default": 302
         },
+        "usepkce": {
+          "title": "Use PKCE",
+          "description": "Enable PKCE (Proof Key for Code Exchange) for enhanced security in OAuth2 flows.",
+          "type": "boolean",
+          "default": false
+        },
         "return_to_query_param": {
           "title": "URL query parameter",
           "description": "Adds the original URL the request tried to access to the query parameter.",
@@ -252,27 +258,33 @@
           "pattern": "^[A-Za-z0-9,._~-]*$",
           "default": ""
         },
-"oidc_authorization_url": {
-      "type": "string",
-      "format": "uri",
-      "description": "OIDC authorization endpoint URL",
-      "examples": ["https://your-oidc-provider.com/oauth2/auth"]
-    },
-    "client_id": {
-      "type": "string",
-      "description": "OIDC client identifier"
-    },
-    "redirect_url": {
-      "type": "string",
-      "format": "uri",
-      "description": "OIDC callback redirect URL"
-    },
-    "scopes": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
+        "oidc_authorization_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "OIDC authorization endpoint URL",
+          "examples": ["https://your-oidc-provider.com/oauth2/auth"]
+        },
+        "client_id": {
+          "type": "string",
+          "description": "OIDC client identifier"
+        },
+        "redirect_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "OIDC callback redirect URL"
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "use_pkce": {
+          "type": "boolean",
+          "title": "Use PKCE",
+          "description": "Enables PKCE (Proof Key for Code Exchange) for enhanced security in the OAuth 2.0 authorization code flow.",
+          "default": false
+        },
         "when": {
           "$ref": "#/definitions/configErrorsWhen"
         }

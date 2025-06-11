@@ -172,7 +172,7 @@ func TestInMemoryStore(t *testing.T) {
 
 	t.Run("state_management", func(t *testing.T) {
 		t.Run("method=AddStateEntry", func(t *testing.T) {
-			store.AddStateEntry("state-123", "Mozilla/5.0", "http://localhost/request", "http://localhost/callback")
+			store.AddStateEntry("state-123", "Mozilla/5.0", "http://localhost/request", "http://localhost/callback", "code_verifier_123")
 
 			// State should be valid immediately after adding with correct User Agent
 			entry, valid := store.ValidateAndRemoveState("state-123", "Mozilla/5.0")
@@ -189,7 +189,7 @@ func TestInMemoryStore(t *testing.T) {
 
 		t.Run("method=ValidateAndRemoveState_with_security_validation", func(t *testing.T) {
 			// Add state
-			store.AddStateEntry("state-security-test", "Edge/90.0", "http://localhost/request", "http://localhost/api")
+			store.AddStateEntry("state-security-test", "Edge/90.0", "http://localhost/request", "http://localhost/api", "code_verifier_security")
 
 			// Should fail with wrong User Agent
 			_, valid := store.ValidateAndRemoveState("state-security-test", "Chrome/90.0")
@@ -210,7 +210,7 @@ func TestInMemoryStore(t *testing.T) {
 
 		t.Run("method=ValidateAndRemoveState", func(t *testing.T) {
 			// Add state
-			store.AddStateEntry("state-456", "Chrome/90.0", "http://localhost/request", "http://localhost/callback")
+			store.AddStateEntry("state-456", "Chrome/90.0", "http://localhost/request", "http://localhost/callback", "code_verifier_456")
 
 			// First validation should succeed and remove
 			entry, valid := store.ValidateAndRemoveState("state-456", "Chrome/90.0")
@@ -231,8 +231,8 @@ func TestInMemoryStore(t *testing.T) {
 
 		t.Run("method=CleanExpiredStates", func(t *testing.T) {
 			// Add some states
-			store.AddStateEntry("recent-state", "Safari/14.0", "http://localhost/request", "http://localhost/callback")
-			store.AddStateEntry("old-state", "Firefox/88.0", "http://localhost/request", "http://localhost/callback")
+			store.AddStateEntry("recent-state", "Safari/14.0", "http://localhost/request", "http://localhost/callback", "code_verifier_recent")
+			store.AddStateEntry("old-state", "Firefox/88.0", "http://localhost/request", "http://localhost/callback", "code_verifier_old")
 
 			// Manually set an old timestamp for one state (this is a limitation of the current implementation)
 			// In a real scenario, you'd wait or use a mock time

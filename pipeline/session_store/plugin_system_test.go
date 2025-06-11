@@ -165,7 +165,7 @@ func TestStateManagementAcrossStores(t *testing.T) {
 			store, err := InitializeSessionStore(config)
 			require.NoError(t, err)
 
-			store.AddStateEntry("test-state", "Mozilla/5.0", "http://localhost/request", "http://localhost/callback")
+			store.AddStateEntry("test-state", "Mozilla/5.0", "http://localhost/request", "http://localhost/callback", "123456789")
 
 			entry, valid := store.ValidateAndRemoveState("test-state", "Mozilla/5.0")
 			assert.True(t, valid)
@@ -182,14 +182,15 @@ func TestStateManagementAcrossStores(t *testing.T) {
 
 type mockStore struct{}
 
-func (m *mockStore) AddSession(sess Session)                                                      {}
-func (m *mockStore) GetSession(id string) (Session, bool)                                         { return Session{}, false }
-func (m *mockStore) DeleteSession(id string)                                                      {}
-func (m *mockStore) CleanExpired()                                                                {}
-func (m *mockStore) GetField(id string, field string) (string, bool)                              { return "", false }
-func (m *mockStore) GetSessionCount() int                                                         { return 0 }
-func (m *mockStore) SessionExists(id string) bool                                                 { return false }
-func (m *mockStore) AddStateEntry(state string, userAgent, requestURL string, upstreamURL string) {}
+func (m *mockStore) AddSession(sess Session)                         {}
+func (m *mockStore) GetSession(id string) (Session, bool)            { return Session{}, false }
+func (m *mockStore) DeleteSession(id string)                         {}
+func (m *mockStore) CleanExpired()                                   {}
+func (m *mockStore) GetField(id string, field string) (string, bool) { return "", false }
+func (m *mockStore) GetSessionCount() int                            { return 0 }
+func (m *mockStore) SessionExists(id string) bool                    { return false }
+func (m *mockStore) AddStateEntry(state string, userAgent, requestURL string, upstreamURL string, codeVerifier string) {
+}
 func (m *mockStore) ValidateAndRemoveState(state string, currentUserAgent string) (StateEntry, bool) {
 	return StateEntry{}, false
 }
@@ -251,13 +252,14 @@ func (f *fileStore) SessionExists(id string) bool {
 	return exists
 }
 
-func (f *fileStore) AddStateEntry(state string, userAgent, requestURL string, upstreamURL string) {
+func (f *fileStore) AddStateEntry(state string, userAgent, requestURL string, upstreamURL string, codeVerifier string) {
 	f.states[state] = StateEntry{
-		State:       state,
-		CreatedAt:   time.Now(),
-		UserAgent:   userAgent,
-		RequestURL:  requestURL,
-		UpstreamURL: upstreamURL,
+		State:        state,
+		CreatedAt:    time.Now(),
+		UserAgent:    userAgent,
+		RequestURL:   requestURL,
+		UpstreamURL:  upstreamURL,
+		CodeVerifier: codeVerifier,
 	}
 }
 

@@ -273,6 +273,12 @@
         "type": "string"
       }
     },
+    "use_pkce": {
+      "type": "boolean",
+      "title": "Use PKCE",
+      "description": "Enables PKCE (Proof Key for Code Exchange) for enhanced security in the OAuth 2.0 authorization code flow.",
+      "default": false
+    },
         "when": {
           "$ref": "#/definitions/configErrorsWhen"
         }
