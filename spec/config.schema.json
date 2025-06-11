@@ -857,6 +857,49 @@
           "type": "boolean",
           "description": "When set to true the HTTP Header X-Forwarded-Host will be set to the original HTTP host.",
           "default": false
+        },
+        "retry": {
+          "type": "object",
+          "title": "Retry Configuration",
+          "description": "Configuration for retrying failed requests.",
+          "properties": {
+            "max_wait": {
+              "type": "string",
+              "title": "Maximum Wait",
+              "description": "The maximum time to wait between retries.",
+              "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+              "default": "1s"
+            },
+            "timeout": {
+              "type": "string",
+              "title": "Timeout",
+              "description": "The initial timeout for retries.",
+              "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+              "default": "500ms"
+            }
+          },
+          "additionalProperties": false
+        },
+        "cache": {
+          "type": "object",
+          "title": "Cache Configuration",
+          "description": "Configuration for caching behavior.",
+          "properties": {
+            "ttl": {
+              "type": "string",
+              "title": "Time to Live",
+              "description": "The time-to-live for cached items.",
+              "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+              "default": "5m"
+            },
+            "max_cost": {
+              "type": "integer",
+              "title": "Maximum Cost",
+              "description": "The maximum cost for the cache.",
+              "default": 1000
+            }
+          },
+          "additionalProperties": false
         }
       },
       "required": [

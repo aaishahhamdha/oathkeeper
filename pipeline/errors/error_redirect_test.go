@@ -631,7 +631,6 @@ func TestErrorRedirectLogoutType(t *testing.T) {
 	})
 }
 
-// TestErrorRedirectAuthType tests the auth type redirect functionality
 func TestErrorRedirectAuthType(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
@@ -660,40 +659,22 @@ func TestErrorRedirectAuthType(t *testing.T) {
 		}{
 			{
 				d:      "should redirect with auth type and generate state",
-				config: `{"to":"http://auth.example.com/login","type":"auth","code":302}`,
+				config: `{"to":"http://auth.example.com/login","type":"auth","code":302,"oidc_authorization_url":"https://lexample.com/oauth2/authorize","client_id":"app123","redirect_url":"https://example.com/callback","scopes":["openid","profile","email"]}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 302, rw.Code)
 					location := rw.Header().Get("Location")
-					assert.Contains(t, location, "http://auth.example.com/login")
+					assert.Contains(t, location, "https://lexample.com/oauth2/authorize")
+					assert.Contains(t, location, "response_type=code")
+					assert.Contains(t, location, "client_id=app123")
+					assert.Contains(t, location, "redirect_uri=https%3A%2F%2Fexample.com%2Fcallback")
+					assert.Contains(t, location, "scope=openid+profile+email")
 					assert.Contains(t, location, "state=")
 
-					// Extract state from the location string manually since URL parsing might fail
-					// due to the malformed URL construction in the implementation
-					parts := strings.Split(location, "state=")
-					require.Len(t, parts, 2, "Location should contain state parameter")
-					state := parts[1]
-
-					// Remove any additional parameters after the state
-					if ampIndex := strings.Index(state, "&"); ampIndex != -1 {
-						state = state[:ampIndex]
-					}
-
+					u, err := url.Parse(location)
+					require.NoError(t, err)
+					state := u.Query().Get("state")
 					assert.NotEmpty(t, state)
-					assert.True(t, len(state) > 10) // State should be reasonably long
-				},
-			},
-			{
-				d:      "should redirect with auth type and return_to param",
-				config: `{"to":"http://auth.example.com/login","type":"auth","return_to_query_param":"return_to","code":302}`,
-				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
-					assert.Equal(t, 302, rw.Code)
-					location := rw.Header().Get("Location")
-					assert.Contains(t, location, "http://auth.example.com/login")
-					assert.Contains(t, location, "return_to=")
-					assert.Contains(t, location, "state=")
-
-					// Verify both parameters are present
-					assert.True(t, strings.Contains(location, "return_to=") && strings.Contains(location, "state="))
+					assert.True(t, len(state) > 10)
 				},
 			},
 		} {

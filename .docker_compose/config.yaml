@@ -4,9 +4,13 @@ serve:
   api:
     port: 4456 # run the api at port 4456
 
+session_store:
+  type: memory
+
 access_rules:
   repositories:
     - file:///etc/config/oathkeeper/rules.json
+
 
 errors:
   fallback:
